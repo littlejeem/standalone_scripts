@@ -5,11 +5,11 @@
 ################################
 test="--dry-run"
 switches="--progress -avz"
-contents_from="/media/Data_1/Videos/SD_Films/" #folder to copy contents from
-folder_to="/mnt/usbstorage/movies" #folder into which copied contents go
+contents_from="" #folder to copy contents from
+folder_to="" #folder into which copied contents go
 remote_user=""
 remote_machine="" #remote IP
-log="/home/jlivin25/bin/scriptlogs/sdmov.log"
+log=""
 #
 ##############################
 ## DEFINE FUNCTION COMMAND ###
