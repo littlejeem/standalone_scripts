@@ -9,7 +9,7 @@ contents_from="" #folder to copy contents from
 folder_to="" #folder into which copied contents go
 remote_user="" #user of the remote machine to copy too
 remote_machine="" #remote machine IP
-log=""
+log="rsync_oneoff.log"
 ################################
 ### SET VARIABLES - WHIPTAIL ###
 ################################
@@ -36,7 +36,6 @@ user_rsync_local () {
 ###################################
 ### DEFINE FUNCTIONS - WHIPTAIL ###
 ###################################
-
 confirmation_dialog () {
 TERM=ansi whiptail --title "INFO" --yesno "$display_message" 8 78
 }
@@ -64,31 +63,31 @@ display_message="You have selected $operation_selected, is this correct?"
 confirmation_dialog
 result=$?
 if [ "$result" == "0" ]; then
- echo "deleting .tmp"
+ echo "user confimed selection, deleting .tmp file and moving on" >> $log
  rm operation_selected.tmp
 elif [ "$result" == "1" ]; then
- echo "EXITING"
+ echo "user stated selection shown not correct, exiting" >> $log
+ #<-- need to call an exit function here
 fi
-echo "$result"
+echo "$result" >> $log
 #
 #
 #+--------------------+#
 #+-- Test Selection --+#
 #+--------------------+#
-#if [ "$operation_selected" == "$copy_operation" ]
-# then
-#  display_message="running local copy"
-#  notification_dialog
-#elif [ "$operation_selected" == "$push_operation" ]
-# then
-#  display_message="running push"
-#  notification_dialog
-#elif [ "$operation_selected" == "$pull_operation" ]
-# then
-#  display_message="running pull copy"
-#  notification_dialog
-#fi
-#
+if [ "$operation_selected" == "$copy_operation" ]
+ then
+  display_message="running local copy"
+  notification_dialog
+elif [ "$operation_selected" == "$push_operation" ]
+ then
+  display_message="running push"
+  notification_dialog
+elif [ "$operation_selected" == "$pull_operation" ]
+ then
+  display_message="running pull copy"
+  notification_dialog
+fi
 #
 #clear
-#exit
+exit
