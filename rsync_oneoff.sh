@@ -44,6 +44,11 @@ notification_dialog () {
 TERM=ansi whiptail --title "INFO" --msgbox "$display_message" 8 78
 }
 #
+input_box () {
+TERM=ansi whiptail --inputbox "$display_message" 8 78 \
+2>"$dir_name".tmp
+}
+#
 #
 #+------------+#
 #+-- MENU 1 --+#
@@ -79,6 +84,9 @@ if [ "$operation_selected" == "$copy_operation" ]
  then
   display_message="running local copy"
   notification_dialog
+  display_message="source file location"
+  dir_name="source_location"
+  input_box
 elif [ "$operation_selected" == "$push_operation" ]
  then
   display_message="running push"
