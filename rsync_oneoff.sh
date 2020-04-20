@@ -87,6 +87,7 @@ if [ "$operation_selected" == "$copy_operation" ]
   display_message="source file location"
   dir_name="source_location"
   input_box
+  "SOME STUFF HERE"
 elif [ "$operation_selected" == "$push_operation" ]
  then
   display_message="running push"
