@@ -49,6 +49,19 @@ TERM=ansi whiptail --inputbox "$display_message" 8 78 \
 2>"$dir_name".tmp
 }
 #
+source_dest_grab () {
+display_message="please enter your source file or folder path"
+dir_name="source_location"
+input_box
+source_location=`cat source_location.tmp`
+display_message="please enter your destination file or folder path"
+dir_name="dest_location"
+input_box
+dest_location=`cat dest_location.tmp`
+display_message="you have chosen $operation_selected from $source_location to $dest_location, is this correct?"
+confirmation_dialog
+}
+#
 #
 #+------------+#
 #+-- MENU 1 --+#
@@ -84,16 +97,7 @@ if [ "$operation_selected" == "$copy_operation" ]
  then
   display_message="running local copy"
   notification_dialog
-  display_message="please enter your source file or folder path"
-  dir_name="source_location"
-  input_box
-  source_location=`cat source_location.tmp`
-  display_message="please enter your destination file or folder path"
-  dir_name="dest_location"
-  input_box
-  dest_location=`cat dest_location.tmp`
-  display_message="you have chosen $operation_selected from $source_location to $dest_location, is this correct?"
-  confirmation_dialog
+  source_dest_grab
   result=$?
   if [ "$result" == "0" ]; then
    echo "user confimed selection, deleting .tmp file and moving on" >> $log
