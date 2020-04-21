@@ -112,9 +112,15 @@ elif [ "$operation_selected" == "$push_operation" ]
  then
   display_message="running push"
   notification_dialog
-  display_message="source file location"
-  dir_name="source_location"
-  input_box
+  source_dest_grab
+  result=$?
+  if [ "$result" == "0" ]; then
+   echo "user confimed selection, deleting .tmp file and moving on" >> $log
+   rm source_location.tmp
+   rm dest_location.tmp
+  elif [ "$result" == "1" ]; then
+   echo "user stated selection shown not correct, exiting" >> $log
+  fi
 elif [ "$operation_selected" == "$pull_operation" ]
  then
   display_message="running pull copy"
