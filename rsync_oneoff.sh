@@ -66,8 +66,8 @@ confirmation_dialog
 #+------------+#
 #+-- MENU 1 --+#
 #+------------+#
-whiptail --title "Radio list example" \
---radiolist "Choose user's permissions" 20 120 3 \
+whiptail --title "Operation Selection" \
+--radiolist "Choose operation type for the task" 20 120 3 \
 "$copy_operation" "(*copy*) Transfer from folder on this machine to folder on same machine" ON \
 "$push_operation" "(*push*) Transfer from folder on this machine to folder on a different machine" OFF \
 "$pull_operation" "(*pull*) Transfer from folder on remote machine to this machine" OFF 2>operation_selected.tmp
