@@ -4,11 +4,8 @@
 ### VARIABLES / PLACEHOLDERS - RSYNC ###
 ########################################
 test="--dry-run"
-switches="--progress -avz"
-contents_from="" #folder to copy contents from
-folder_to="" #folder into which copied contents go
-remote_user="" #user of the remote machine to copy too
-remote_machine="" #remote machine IP
+flags="--progress"
+switches="-avz"
 log="rsync_oneoff.log"
 ################################
 ### SET VARIABLES - WHIPTAIL ###
@@ -22,15 +19,15 @@ pull_operation="LOCAL <-- REMOTE"
 ## DEFINE FUNCTIONS - RSYNC ###
 ###############################
 user_rsync_push () {
-  rsync "$test" "$switches" "$contents_from" "$remote_user"@"remote_machine":"$folder_to" > "$log" 2>&1
+  rsync "$test" "$switches" "$contents_from" "$remote_user"@"remote_machine":"$folder_to" >> "$log" 2>&1
 }
 #
 user_rsync_pull () {
-  rsync "$test" "$switches" "$contents_from" "$remote_user"@"remote_machine":"$folder_to" > "$log" 2>&1
+  rsync "$test" "$switches" "$contents_from" "$remote_user"@"remote_machine":"$folder_to" >> "$log" 2>&1
 }
 #
-user_rsync_local () {
-  rsync "$test" "$switches" "$contents_from" "$remote_user"@"remote_machine":"$folder_to" > "$log" 2>&1
+user_rsync_copy () {
+  rsync "$test" "$flags" "$switches" "$source_location" to "$dest_location" >> "$log" 2>&1
 }
 #
 ###################################
@@ -103,6 +100,7 @@ if [ "$operation_selected" == "$copy_operation" ]
    echo "user confimed selection, deleting .tmp file and moving on" >> $log
    rm source_location.tmp
    rm dest_location.tmp
+   user_rsync_copy
   elif [ "$result" == "1" ]; then
    echo "user stated selection shown not correct, exiting" >> $log
  #<-- need to call an exit function here
