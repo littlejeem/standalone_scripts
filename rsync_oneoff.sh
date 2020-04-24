@@ -96,14 +96,16 @@ if [ "$operation_selected" == "$copy_operation" ]
   notification_dialog
   source_dest_grab
   result=$?
-  if [ "$result" == "0" ]; then
+  if [ "$result" == "0" ]
+   then
    echo "user confimed selection, deleting .tmp file and moving on" >> $log
-   rm source_location.tmp
-   rm dest_location.tmp
+   # rm source_location.tmp
+   # rm dest_location.tmp
    user_rsync_copy
-  elif [ "$result" == "1" ]; then
+  elif [ "$result" == "1" ]
+   then
    echo "user stated selection shown not correct, exiting" >> $log
- #<-- need to call an exit function here
+   #<-- need to call an exit function here
   fi
   echo "$result" >> $log
 elif [ "$operation_selected" == "$push_operation" ]
