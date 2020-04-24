@@ -27,7 +27,7 @@ user_rsync_pull () {
 }
 #
 user_rsync_copy () {
-  rsync "$test" "$flags" "$switches" "$source_location" to "$dest_location" >> "$log" 2>&1
+  rsync "$test" "$flags" "$switches" "$source_location" "$dest_location" >> "$log" 2>&1
 }
 #
 ###################################
