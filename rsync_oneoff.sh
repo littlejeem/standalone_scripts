@@ -101,7 +101,12 @@ if [ "$operation_selected" == "$copy_operation" ]
    echo "user confimed selection, deleting .tmp file and moving on" >> $log
    # rm source_location.tmp
    # rm dest_location.tmp
-   user_rsync_copy
+   #<-- Test if running rsync in dry run or not
+   if [ "$test" == "--dry-run" ]
+    then echo "running rsync in TEST mode" >> $log
+    user_rsync_copy
+    else echo "running rsync in FULL mode" >> $log
+   fi
   elif [ "$result" == "1" ]
    then
    echo "user stated selection shown not correct, exiting" >> $log
