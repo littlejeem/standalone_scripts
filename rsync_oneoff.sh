@@ -137,6 +137,10 @@ elif [ "$operation_selected" == "$pull_operation" ]
   dir_name="source_location"
   input_box
 fi
+echo $operation_selected
+echo $source_location
+echo $dest_location
+echo $test
 #
 #clear
 exit
