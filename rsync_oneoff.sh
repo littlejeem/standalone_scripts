@@ -3,6 +3,7 @@
 ########################################
 ### VARIABLES / PLACEHOLDERS - RSYNC ###
 ########################################
+log_level="1"
 test="--dry-run"
 flags="--progress"
 switches="-avz"
@@ -74,6 +75,13 @@ whiptail --title "Operation Selection" \
 #+-- MENU 2 - Check Selection --+#
 #+------------------------------+#
 operation_selected=`cat operation_selected.tmp`
+#<-- debug logging
+if [ "$log_level" != "1" ]
+ then
+ :
+ else
+ echo "$operation_selected" >> $log
+fi
 display_message="You have selected $operation_selected, is this correct?"
 confirmation_dialog
 result=$?
@@ -81,7 +89,7 @@ if [ "$result" == "0" ]; then
  echo "user confimed selection, deleting .tmp file and moving on" >> $log
  rm operation_selected.tmp
 elif [ "$result" == "1" ]; then
- echo "user stated selection shown not correct, exiting" >> $log
+ echo "user stated incorrect selection shown not, exiting" >> $log
  #<-- need to call an exit function here
 fi
 echo "$result" >> $log
@@ -137,10 +145,20 @@ elif [ "$operation_selected" == "$pull_operation" ]
   dir_name="source_location"
   input_box
 fi
-echo $operation_selected
-echo $source_location
-echo $dest_location
-echo $test
+#<-- debug logging
+if [ "$log_level" != "1" ]
+ then
+ :
+ else
+ echo "$operation_selected" >> $log
+ echo "$operation_selected"
+ echo "$source_location" >> $log
+ echo "$source_location"
+ echo "$dest_location" >> $log
+ echo "$dest_location"
+ echo "$test" >> $log
+ echo "$test"
+fi
 #
 #clear
 exit
