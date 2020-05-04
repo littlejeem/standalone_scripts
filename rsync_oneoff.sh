@@ -105,6 +105,9 @@ if [ "$operation_selected" == "$copy_operation" ]
    if [ "$test" == "--dry-run" ]
     then echo "running rsync in TEST mode" >> $log
     user_rsync_copy
+    #<-- grab the PID of the rsync job
+    rsync_user_pid=$!
+    echo $rsync_user_pid >> $log
     else echo "running rsync in FULL mode" >> $log
    fi
   elif [ "$result" == "1" ]
