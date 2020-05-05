@@ -3,7 +3,7 @@
 ########################################
 ### VARIABLES / PLACEHOLDERS - RSYNC ###
 ########################################
-log_level="1"
+log_level="0"
 test="--dry-run"
 flags="--progress"
 switches="-avz"
