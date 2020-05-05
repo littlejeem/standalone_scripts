@@ -21,6 +21,12 @@ pull_operation="LOCAL <-- REMOTE"
 ###############################
 user_rsync_push () {
   rsync "$test" "$switches" "$contents_from" "$remote_user"@"remote_machine":"$folder_to" >> "$log" 2>&1
+  if [ $? == "0" ]
+   then
+   echo "rsync completed successfully" >> $log
+   else
+   echo "rsync produced an error" >> $log
+  fi
 }
 #
 user_rsync_pull () {
