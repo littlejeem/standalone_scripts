@@ -97,7 +97,6 @@ elif [ "$result" == "1" ]
     echo "user stated selection shown not correct, exiting" >> $log
     #<-- need to call an exit function here
  fi
-fi
 echo "$result" >> $log
 }
 #
