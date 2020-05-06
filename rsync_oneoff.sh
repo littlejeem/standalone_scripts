@@ -67,6 +67,43 @@ confirmation_dialog
 }
 #
 #
+#################################
+### DEFINE FUNCTIONS - SCRIPT ###
+#################################
+errorcheck_sync () {
+notification_dialog
+source_dest_grab
+result=$?
+ if [ "$result" == "0" ]
+  notification_dialog
+   source_dest_grab
+   result=$?
+  then
+  echo "user confimed selection, deleting .tmp file and moving on" >> $log
+  #rm source_location.tmp
+  #rm dest_location.tmp
+  #<-- Test if running rsync in dry run or not
+  if [ "$test" == "--dry-run" ]
+   then
+   echo "running rsync in TEST mode" >> $log
+   display_message="rsync dry run mode is set in config"
+   notification_dialog
+   user_rsync_copy
+   #<-- grab the PID of the rsync job
+   rsync_user_pid=$!
+   echo $rsync_user_pid >> $log
+   else echo "running rsync in FULL mode" >> $log
+  fi
+  elif [ "$result" == "1" ]
+   then
+    echo "user stated selection shown not correct, exiting" >> $log
+    #<-- need to call an exit function here
+  fi
+ fi
+echo "$result" >> $log
+}
+#
+#
 #+------------+#
 #+-- MENU 1 --+#
 #+------------+#
@@ -107,11 +144,18 @@ echo "$result" >> $log
 if [ "$operation_selected" == "$copy_operation" ]
  then
   display_message="running local copy"
+  errorcheck_sync
+elif [ "$operation_selected" == "$push_operation" ]
+ then
+  display_message="running push"
   notification_dialog
   source_dest_grab
   result=$?
-  if [ "$result" == "0" ]
-   then
+  errorcheck_sync
+
+
+if [ "$result" == "0" ]
+  then
    echo "user confimed selection, deleting .tmp file and moving on" >> $log
    # rm source_location.tmp
    # rm dest_location.tmp
@@ -133,14 +177,8 @@ if [ "$operation_selected" == "$copy_operation" ]
    #<-- need to call an exit function here
   fi
   echo "$result" >> $log
-elif [ "$operation_selected" == "$push_operation" ]
- then
-  display_message="running push"
-  notification_dialog
-  source_dest_grab
-  result=$?
-  if [ "$result" == "0" ]; then
-   echo "user confimed selection, deleting .tmp file and moving on" >> $log
+
+
    rm source_location.tmp
    rm dest_location.tmp
   elif [ "$result" == "1" ]; then
