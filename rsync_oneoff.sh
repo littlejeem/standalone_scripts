@@ -3,7 +3,7 @@
 ########################################
 ### VARIABLES / PLACEHOLDERS - RSYNC ###
 ########################################
-log_level="0"
+log_level="1"
 test="--dry-run"
 flags="--progress"
 switches="-avz"
@@ -117,7 +117,10 @@ if [ "$operation_selected" == "$copy_operation" ]
    # rm dest_location.tmp
    #<-- Test if running rsync in dry run or not
    if [ "$test" == "--dry-run" ]
-    then echo "running rsync in TEST mode" >> $log
+    then
+    echo "running rsync in TEST mode" >> $log
+    display_message="rsync "dry run" mode is set in config"
+    notification_dialog
     user_rsync_copy
     #<-- grab the PID of the rsync job
     rsync_user_pid=$!
