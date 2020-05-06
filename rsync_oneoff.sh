@@ -119,7 +119,7 @@ if [ "$operation_selected" == "$copy_operation" ]
    if [ "$test" == "--dry-run" ]
     then
     echo "running rsync in TEST mode" >> $log
-    display_message="rsync "dry run" mode is set in config"
+    display_message="rsync dry run mode is set in config"
     notification_dialog
     user_rsync_copy
     #<-- grab the PID of the rsync job
