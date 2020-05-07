@@ -2,7 +2,7 @@
 
 # this script is to automatically convert a folder of video files
 # You need to change SRC -- Source folder and DEST -- Destination folder
-
+VERSION="0.8"
 SRC="/media/Data_1/Videos/TV_Shows/Chernobyl/Season 1"
 DEST="/home/jlivin25/Videos"
 DEST_EXT="mp4"
