@@ -86,11 +86,15 @@ if [ "$result" == "0" ]
     display_message="rsync dry run mode is set in config"
     notification_dialog
     user_rsync_copy
+   else
+    echo "running rsync in FULL mode" >> $log
+    display_message="rsync running now"
+    notification_dialog
+    echo user_rsync_"$syncmode" >> $log
+    #user_rsync_"$syncmode"
     #<-- grab the PID of the rsync job
     rsync_user_pid=$!
     echo $rsync_user_pid >> $log
-   else
-    echo "running rsync in FULL mode" >> $log
    fi
 elif [ "$result" == "1" ]
  then
@@ -112,7 +116,7 @@ whiptail --title "Operation Selection" \
 #
 #
 #+------------------------------+#
-#+-- MENU 2 - Check Selection --+#
+#+-- MENU 2 -
 #+------------------------------+#
 operation_selected=`cat operation_selected.tmp`
 #<-- debug logging
@@ -139,14 +143,17 @@ echo "$result" >> $log
 if [ "$operation_selected" == "$copy_operation" ]
  then
   display_message="running local copy"
+  syncmode=copy
   errorcheck_sync
 elif [ "$operation_selected" == "$push_operation" ]
  then
   display_message="running push"
+  syncmode=push
   errorcheck_sync
 elif [ "$operation_selected" == "$pull_operation" ]
  then
   display_message="running pull copy"
+  syncmode=pull
   errorcheck_sync
 fi
 #<-- debug logging
