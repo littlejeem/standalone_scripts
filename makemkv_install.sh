@@ -17,7 +17,7 @@ fi
 #+--------------------------------+
 #+----FInd the current version----+
 #+--------------------------------+
-urlcontent=$(wget https://www.makemkv.com/forum/viewtopic.php?f=3&t=224 -q -O -)
+urlcontent=$(wget "https://www.makemkv.com/forum/viewtopic.php?f=3&t=224" -q -O -)
 version_grab=$(echo "$urlcontent" | grep -o -P '(?<=<title>).*(?=</title>)')
 version=${version_grab:8:6}
 #
@@ -50,7 +50,7 @@ chmod -R 766 "$topdir"/Downloads
 cd "$topdir"/Downloads/makemkv-oss
 sudo -u $assigned_user ./configure
 sudo -u $assigned_user make
-sudo make install
+make install
 #
 #
 #+---------------+
@@ -58,4 +58,12 @@ sudo make install
 #+---------------+
 cd "$topdir"/Downloads/makemkv-bin
 sudo -u $assigned_user make
-sudo make install
+make install
+#
+#
+#+--------------+
+#+---Clean Up---+
+#+--------------+
+cd /home/$assigned_user
+rm -r Downloads/makemkv-bin
+rm -r Downloads/makemkv-oss
