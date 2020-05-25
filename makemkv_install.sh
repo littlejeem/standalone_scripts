@@ -7,7 +7,7 @@ assigned_user="jlivin25"
 #+-----------------------------------------------+
 #+----check running as root before continuing----+
 #+-----------------------------------------------+
-if [[ $UID != 0 ]]; then
+if [[ $EUID -ne 0 ]]; then
     echo "Please run this script with sudo:"
     echo "sudo $0 $*"
     exit 1
