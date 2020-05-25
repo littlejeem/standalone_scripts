@@ -4,9 +4,10 @@
 #############################################################
 ### A script to automatically update the key MakeMKV beta ###
 #############################################################
-FILE_LOC=/home/jlivin25/.MakeMKV/settings.conf
+file_loc=/home/jlivin25/.MakeMKV/settings.conf
 #URL='https://www.makemkv.com/forum/viewtopic.php?t=1053'
-URLCONTENT=$(wget https://www.makemkv.com/forum/viewtopic.php?t=1053 -q -O -)
-KEY=$(echo "$URLCONTENT" | grep -o -P '(?<=<code>).*(?=</code>)')
-echo "$KEY"
-sed -i "s|^app_Key.*|${KEY}|" /home/jlivin25/.MakeMKV/settings.conf
+url_content=$(wget https://www.makemkv.com/forum/viewtopic.php?t=1053 -q -O -)
+key=$(echo "$url_content" | grep -o -P '(?<=<code>).*(?=</code>)')
+echo "$key"
+keyinsert=('"'$key'"')
+sed -i 's/".*"/\'$keyinsert'/' settings.conf
