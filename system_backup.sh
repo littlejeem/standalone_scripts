@@ -3,7 +3,7 @@
 #+-----------------+
 #+---"VARIABLES"---+
 #+-----------------+
-stamp=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`") #create a timestamp for our backup
+stamp=$(echo "`date +%d%m%Y`-`date +%H%M`") #create a timestamp for our backup
 username=jlivin25 #name of the system user doing the backup
 sysname="mediapc_test"
 backupfolder="/home/$username/SysBackups"
@@ -24,7 +24,8 @@ fi
 #+-----------------+
 mkdir -p $backupfolder
 cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
-tar -cvpzf /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz \
+#tar -cvpzf /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz \
+tar -cvpzf backup.tar.gz \
 --exclude=/$backupfolder \
 --exclude=/proc \
 --exclude=/tmp \
@@ -51,6 +52,8 @@ tar -cvpzf /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz \
 #+---------------------+
 if [ $? == "0" ]
  then
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` backup completed successfully"
+  mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` tar backup ** "$stamp"_"$sysname"_backup.tar.gz ** completed successfully"
  else
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` tar backup process produced an error"
