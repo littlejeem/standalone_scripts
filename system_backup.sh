@@ -4,14 +4,14 @@
 #+---"VARIABLES"---+
 #+-----------------+
 stamp=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`") #create a timestamp for our backup
-username=jlivin25#name of the system user doing the backup
-sysname=""
+username=jlivin25 #name of the system user doing the backup
+sysname="mediapc_test"
 #
 #
 #+-----------------+
 #+---MAIN SCRIPT---+
 #+-----------------+
-mkdir -p /home/"$username"/SysBackups
+mkdir -p /home/$username/SysBackups
 cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
 tar -cvpzf "$stamp"_"$sysname"_backup.tar.gz \
 --exclude=/"$stamp"_"$sysname"_backup.tar.gz \
