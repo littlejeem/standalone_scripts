@@ -26,6 +26,7 @@ mkdir -p $backupfolder
 cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
 #tar -cvpzf /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz \
 tar -cvpzf backup.tar.gz \
+--exclude=/backup.tar.gz \
 --exclude=/$backupfolder \
 --exclude=/proc \
 --exclude=/tmp \
