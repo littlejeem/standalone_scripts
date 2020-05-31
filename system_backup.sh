@@ -25,6 +25,7 @@ fi
 mkdir -p $backupfolder
 cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
 #tar -cvpzf /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz \
+touch backup.tar.gz
 tar -cvpzf backup.tar.gz \
 --exclude=/backup.tar.gz \
 --exclude=/$backupfolder \
@@ -41,10 +42,11 @@ tar -cvpzf backup.tar.gz \
 --exclude=/usr/src/linux-headers* \
 --exclude=/home/*/.gvfs \
 --exclude=/home/*/.cache \
---exclude=/home/$username/Downloads \
---exclude=/home/$username/Music \
---exclude=/home/$username/Videos \
---exclude=/home/$username/temp \
+--exclude=/home/*/Downloads \
+--exclude=/home/*/Music \
+--exclude=/home/*/Videos \
+--exclude=/home/*/temp \
+--exclude=/home/*/.kodi/userdata/Thumbnails \
 --exclude=/home/*/.local/share/Trash /
 #
 #
