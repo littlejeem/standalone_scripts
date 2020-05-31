@@ -8,6 +8,16 @@ username=jlivin25 #name of the system user doing the backup
 sysname="mediapc_test"
 #
 #
+#+--------------------+
+#+---CHECK FOR SUDO---+
+#+--------------------+
+if [[ $EUID -ne 0 ]]; then
+    echo "Please run this script with sudo:"
+    echo "sudo $0 $*"
+    exit 1
+fi
+#
+#
 #+-----------------+
 #+---MAIN SCRIPT---+
 #+-----------------+
@@ -33,6 +43,11 @@ tar -cvpzf "$stamp"_"$sysname"_backup.tar.gz \
 --exclude=/home/$username/SysBackups \
 --exclude=/home/$username/temp \
 --exclude=/home/*/.local/share/Trash /
+#
+#
+#+---------------------+
+#+---CHECK FOR ERROR---+
+#+---------------------+
 if [ $? == "0" ]
  then
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` tar backup ** "$stamp"_"$sysname"_backup.tar.gz ** completed successfully"
