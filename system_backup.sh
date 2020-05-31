@@ -24,7 +24,6 @@ fi
 #+-----------------+
 mkdir -p $backupfolder
 cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
-#tar -cvpzf /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz \
 touch backup.tar.gz
 tar -cvpzf backup.tar.gz \
 --exclude=/backup.tar.gz \
@@ -36,6 +35,8 @@ tar -cvpzf backup.tar.gz \
 --exclude=/sys \
 --exclude=/run \
 --exclude=/sys \
+--exclude=/var \
+--exclude=/lib \
 --exclude=/media \
 --exclude=/var/log \
 --exclude=/var/cache/apt/archives \
@@ -58,6 +59,8 @@ if [ $? == "0" ]
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` backup completed successfully"
   mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` tar backup ** "$stamp"_"$sysname"_backup.tar.gz ** completed successfully"
+  exit 0
  else
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` tar backup process produced an error"
+  exit 1
 fi
