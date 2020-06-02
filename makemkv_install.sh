@@ -4,9 +4,9 @@
 #
 topdir="/home/jlivin25"
 assigned_user="jlivin25"
-#+-----------------------------------------------+
-#+----check running as root before continuing----+
-#+-----------------------------------------------+
+#+---------------------------------------------+
+#+---check running as root before continuing---+
+#+---------------------------------------------+
 if [[ $EUID -ne 0 ]]; then
     echo "Please run this script with sudo:"
     echo "sudo $0 $*"
@@ -14,17 +14,24 @@ if [[ $EUID -ne 0 ]]; then
 fi
 #
 #
-#+--------------------------------+
-#+----FInd the current version----+
-#+--------------------------------+
+#+------------------------------+
+#+---FInd the current version---+
+#+------------------------------+
 urlcontent=$(wget "https://www.makemkv.com/forum/viewtopic.php?f=3&t=224" -q -O -)
 version_grab=$(echo "$urlcontent" | grep -o -P '(?<=<title>).*(?=</title>)')
 version=${version_grab:8:6}
 #
 #
-#+-------------------------+
-#+----Start Main Script----+
-#+-------------------------+
+#+------------------------------------+
+#+---Install the necessary packages---+
+#+------------------------------------+
+apt install -y build-essential pkg-config libc6-dev libssl-dev libexpat1-dev libavcodec-dev libgl1-mesa-dev qtbase5-dev zlib1g-dev
+# Is there a more elegant way to do the above, don't know as yet
+#
+#
+#+-----------------------+
+#+---Start Main Script---+
+#+-----------------------+
 cd ~/
 sudo -u $assigned_user mkdir -p "$topdir"/Downloads
 cd "$topdir"/Downloads
