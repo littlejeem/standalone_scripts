@@ -17,7 +17,7 @@ then
   	echo "$file_loc not empty so inserting key"
     sed -i 's/".*"/\'$keyinsert'/' $file_loc
   else
-  	echo "$_file is empty, inserting text"
+  	echo "$file_loc is empty, inserting text"
     echo 'appKey:""' > $file_loc
     sed -i 's/".*"/\'$keyinsert'/' $file_loc
   fi
