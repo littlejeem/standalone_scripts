@@ -3,6 +3,12 @@
 #+-----------------+
 #+---"VARIABLES"---+
 #+-----------------+
+#+---------------------+
+#+---"Set Variables"---+
+#+---------------------+
+PATH=/sbin:/bin:/usr/bin:/home/jlivin25
+log=/home/pi/bin/script_logs/system_backup.sh
+notify_lock=/tmp/system_backup_notify
 stamp=$(echo "`date +%d%m%Y`-`date +%H%M`") #create a timestamp for our backup
 username=jlivin25 #name of the system user doing the backup
 sysname="mediapc_test"
