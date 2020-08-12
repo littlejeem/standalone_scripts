@@ -25,7 +25,7 @@ version=${version_grab:8:6}
 #+------------------------------------+
 #+---Install the necessary packages---+
 #+------------------------------------+
-apt install -y build-essential pkg-config libc6-dev libssl-dev libexpat1-dev libavcodec-dev libgl1-mesa-dev qtbase5-dev zlib1g-dev
+apt update && apt install -y build-essential pkg-config libc6-dev libssl-dev libexpat1-dev libavcodec-dev libgl1-mesa-dev qtbase5-dev zlib1g-dev
 # Is there a more elegant way to do the above, don't know as yet
 #
 #
