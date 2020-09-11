@@ -25,7 +25,7 @@ else
   echo "$file_loc doesn't exist, creating it"
   touch $file_loc
   echo "inserting appKey variable"
-  echo 'appKey:""' > $file_loc
+  echo 'app_Key = ""' > $file_loc
   echo "inserting key"
   sed -i 's/".*"/\'$keyinsert'/' $file_loc
 fi
