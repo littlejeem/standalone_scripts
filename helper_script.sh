@@ -1,3 +1,13 @@
+#!/usr/bin/env bash
+#
+#
+######################################################################
+### INFORMATION
+### Your script must define the following variables:
+###
+### sctipt_log --> to use the logging ###
+### $backup_app_token, $user_token & $message_form --> to use Pushover
+######################################################################
 #
 #
 #+---------------------+
@@ -16,16 +26,6 @@ purple='\033[0;35m'
 light_blue='\033[1;34m'
 #no colour
 nc='\033[0m'
-#
-#
-SCRIPT_LOG="/home/pi/bin/SystemOut.log"
-touch $SCRIPT_LOG
-#
-#
-#function Timestamp ()
-#{
-#  echo "$(date +%d/%m/%Y) - $(date +%H:%M:%S) - $1"
-#}
 #
 #
 #+-----------------------+
@@ -90,4 +90,18 @@ ERROR ()
 #+------------------------+
 #+---Pushover Functions---+
 #+------------------------+
+function Pushover ()
+{
+  curl -s --form-string token="$backup_app_token" --form-string user="$user_token" --form-string message="$message_form" https://api.pushover.net/1/messages.json
+}
+#
+#
+#+---------------+
+#+---Timestamp---+
+#+---------------+
+function Timestamp ()
+{
+  echo "$(date +%d/%m/%Y) - $(date +%H:%M:%S) - $1"
+}
+#
 #
