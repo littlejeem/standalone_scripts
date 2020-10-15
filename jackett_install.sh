@@ -12,7 +12,7 @@ source ./helper_script.sh
 #+---"Set Variables"---+
 #+---------------------+
 SCRIPTENTRY
-sctipt_log="/home/pi/bin/logs/jackett_install.log"
+SCRIPT_LOG="/home/pi/bin/logs/jackett_install.log"
 stamp=$(Timestamp)
 #
 #
