@@ -48,13 +48,14 @@ mkdir -p ~/ffmpeg_sources ~/bin
 #####################################
 ### INSTALL THIRD-PARTY LIBRARIES ###
 #####################################
-sudo apt-get install nasm
-sudo apt-get install yasm
-sudo apt-get install libx264-dev
-sudo apt-get install libx265-dev libnuma-dev
-sudo apt-get install libvpx-dev
-sudo apt-get install libfdk-aac-dev
-sudo apt-get install libmp3lame-dev
+sudo apt-get install -y nasm
+sudo apt-get install -y yasm
+sudo apt-get install -y libx264-dev
+sudo apt-get install -y libx265-dev
+sudo apt-get install -y libnuma-dev
+sudo apt-get install -y libvpx-dev
+sudo apt-get install -y libfdk-aac-dev
+sudo apt-get install -y libmp3lame-dev
 #
 #
 ############################################################
