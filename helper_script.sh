@@ -31,9 +31,9 @@ nc='\033[0m'
 #+-----------------------+
 #+---Logging Functions---+
 #+-----------------------+
-tty -s && function log()     {     echo $(date +%m/%d) $(date +%H:%M:%S): INFO "$@"; }
-tty -s && function log_deb() {     echo $(date +%m/%d) $(date +%H:%M:%S): DEBUG "$@"; }
-tty -s && function log_err() { >&2 echo $(date +%m/%d) $(date +%H:%M:%S): ERROR "$@"; }
+tty -s && function log()     {     echo $(date +%a)    $(date +%d) $(date +%T): INFO "$@"; }
+tty -s && function log_deb() {     echo $(date +%a)    $(date +%d) $(date +%T): DEBUG "$@"; }
+tty -s && function log_err() { >&2 echo $(date +%a)    $(date +%d) $(date +%T): ERROR "$@"; }
 tty -s || function log()     { logger -t INFO $(basename $0) "$@"; }
 tty -s || function log_deb() { logger -t DEBUG $(basename $0) "$@"; }
 tty -s || function log_err() { logger -t ERROR $(basename $0) -p user.err "$@"; }
