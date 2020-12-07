@@ -31,9 +31,9 @@ nc='\033[0m'
 #+-----------------------+
 #+---Logging Functions---+
 #+-----------------------+
-tty -s && function log()     {     echo "$@"; }
-tty -s && function log_deb() {     echo "$@"; }
-tty -s && function log_err() { >&2 echo "$@"; }
+tty -s && function log()     {     echo $(date +%m/%d) $(date +%H:%M:%S): INFO "$@"; }
+tty -s && function log_deb() {     echo $(date +%m/%d) $(date +%H:%M:%S): DEBUG "$@"; }
+tty -s && function log_err() { >&2 echo $(date +%m/%d) $(date +%H:%M:%S): ERROR "$@"; }
 tty -s || function log()     { logger -t INFO $(basename $0) "$@"; }
 tty -s || function log_deb() { logger -t DEBUG $(basename $0) "$@"; }
 tty -s || function log_err() { logger -t ERROR $(basename $0) -p user.err "$@"; }
@@ -51,6 +51,9 @@ function Pushover ()
 #+---------------+
 #+---Timestamp---+
 #+---------------+
+#
+#As this is used to replicate syslog in Logging Functiosn should it not be the same format? <-- Dec  7 20:48:52 testbed-1804
+#
 function Timestamp ()
 {
   echo "$(date +%d/%m/%Y) - $(date +%H:%M:%S) - $1"
