@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
 #
 #
-######################################################################
-### INFORMATION
-### Your script must define the following variables:
-###
-### sctipt_log --> to use the logging ###
-### $backup_app_token, $user_token & $message_form --> to use Pushover
-######################################################################
-#
-#
 #+---------------------+
 #+---Logging Colours---+
 #+---------------------+
@@ -56,7 +47,7 @@ function Pushover ()
 #
 function Timestamp ()
 {
-  echo "$(date +%d/%m/%Y) - $(date +%H:%M:%S) - $1"
+  echo "$(date +%b"  "%-d" "%T)" " "$1
 }
 #
 #
