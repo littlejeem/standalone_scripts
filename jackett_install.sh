@@ -11,7 +11,6 @@ source ./helper_script.sh
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
-SCRIPTENTRY
 SCRIPT_LOG="/home/pi/bin/logs/jackett_install.log"
 stamp=$(Timestamp)
 #
@@ -24,18 +23,9 @@ cp ~/.config/Jackett/ServerConfig.json ~/ServerConfig.json
 systemctl stop jackett.service
 #
 if [ -d "Jackett" ]; then
-  ENTRY
   mv Jackett Jackett_$stamp
-  EXIT
 fi
 tar -xvf Jackett.tar
-INFO
 systemctl start jackett.service
-INFO
 rm ~/ServerConfig.json
-INFO
 rm Jackett.tar
-INFO
-#
-#
-SCRIPTEXIT
