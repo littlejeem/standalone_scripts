@@ -59,25 +59,25 @@ else
     exit 1
   fi
   log "creating .service file"
-  cat > /etc/systemd/system/jackett.service <<-EOF
-  [Unit]
-  Description=Jackett Daemon
-  After=network.target
+cat > /etc/systemd/system/jackett.service <<EOF
+[Unit]
+Description=Jackett Daemon
+After=network.target
 
-  [Service]
-  SyslogIdentifier=jackett
-  Restart=always
-  RestartSec=5
-  Type=simple
-  User=$USER
-  Group=$USER
-  WorkingDirectory=/opt/Jackett
-  ExecStart=/opt/Jackett/jackett --NoRestart
-  TimeoutStopSec=20
+[Service]
+SyslogIdentifier=jackett
+Restart=always
+RestartSec=5
+Type=simple
+User=$USER
+Group=$USER
+WorkingDirectory=/opt/Jackett
+ExecStart=/opt/Jackett/jackett --NoRestart
+TimeoutStopSec=20
 
-  [Install]
-  WantedBy=multi-user.target
-  EOF
+[Install]
+WantedBy=multi-user.target
+EOF
   if [[ $? -eq 1 ]]; then
     log_err "creating .service file failed, exiting..."
     exit 1
