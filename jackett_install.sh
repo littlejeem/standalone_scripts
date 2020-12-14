@@ -15,7 +15,7 @@ fi
 #+-------------------+
 #+---Source helper---+
 #+-------------------+
-source ./helper_script.sh
+source /home$USER/bin/standalone_scripts/helper_script.sh
 #
 #
 #+---------------------+
