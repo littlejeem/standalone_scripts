@@ -15,7 +15,7 @@ fi
 #+-------------------+
 #+---Source helper---+
 #+-------------------+
-source /home$USER/bin/standalone_scripts/helper_script.sh
+source /home/$USER/bin/standalone_scripts/helper_script.sh
 #
 #
 #+---------------------+
@@ -53,7 +53,7 @@ else
 #    log_err "moving to /opt/ failed, exiting..."
 #    exit 1
 #  fi
-  chmod $USER:$USER /opt/Jackett
+  chown $USER:$USER /opt/Jackett
   if [[ $? -eq 1 ]]; then
     log_err "chowning /opt/Radarr, exiting..."
     exit 1
