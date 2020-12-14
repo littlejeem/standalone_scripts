@@ -12,12 +12,6 @@ if [[ $EUID -ne 0 ]]; then
 fi
 #
 #
-#+-------------------+
-#+---Source helper---+
-#+-------------------+
-source /home/$install_user/bin/standalone_scripts/helper_script.sh
-#
-#
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
@@ -25,6 +19,12 @@ PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25
 jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}')
 jackett_target=$(echo $jackettver)
 install_user=jlivin25
+#
+#
+#+-------------------+
+#+---Source helper---+
+#+-------------------+
+source /home/$install_user/bin/standalone_scripts/helper_script.sh
 #
 #
 #+-------------------------+
