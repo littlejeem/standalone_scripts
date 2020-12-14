@@ -17,7 +17,7 @@ fi
 #+---------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
 jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}')
-jackett_target=$(echo $jackettver)
+jackett_target=$(echo $jackett_ver)
 install_user=jlivin25
 #
 #
@@ -47,7 +47,7 @@ if [ -d "/opt/Jackett" ]; then
 else
   log "No Jackett install detected, attempting install"
   cd /opt
-  log "downloading version $jackett_target"
+  log "downloading version $(echo $jackett_target)"
   wget -q https://github.com/Jackett/Jackett/releases/download/$jackett_target/Jackett.Binaries.LinuxAMDx64.tar.gz
   tar -xvf Jackett*
 #  mv Jackett /opt/
