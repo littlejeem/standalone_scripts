@@ -15,19 +15,21 @@ fi
 #+-------------------+
 #+---Source helper---+
 #+-------------------+
-source /home/$USER/bin/standalone_scripts/helper_script.sh
+source /home/$install_user/bin/standalone_scripts/helper_script.sh
 #
 #
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
-SCRIPT_LOG="/home/pi/bin/logs/jackett_install.log"
-stamp=$(Timestamp)
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-#
-#
 jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}')
 jackett_target=$(echo $jackettver)
+install_user=jlivin25
+#
+#
+#+-------------------------+
+#+---"Start main script"---+
+#+-------------------------+
 if [ -d "/opt/Jackett" ]; then
   log "Jackett install detected, attempting update"
   cd /opt
@@ -53,7 +55,7 @@ else
 #    log_err "moving to /opt/ failed, exiting..."
 #    exit 1
 #  fi
-  chown $USER:$USER /opt/Jackett
+  chown $install_user:$install_user /opt/Jackett
   if [[ $? -eq 1 ]]; then
     log_err "chowning /opt/Radarr, exiting..."
     exit 1
@@ -69,8 +71,8 @@ SyslogIdentifier=jackett
 Restart=always
 RestartSec=5
 Type=simple
-User=$USER
-Group=$USER
+User=$install_user
+Group=$install_user
 WorkingDirectory=/opt/Jackett
 ExecStart=/opt/Jackett/jackett --NoRestart
 TimeoutStopSec=20
