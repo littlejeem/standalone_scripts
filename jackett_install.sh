@@ -61,6 +61,7 @@ else
     exit 1
   fi
   log "creating .service file"
+  if [ -f "/etc/systemd/system/jackett.service" ]; then
 cat > /etc/systemd/system/jackett.service <<EOF
 [Unit]
 Description=Jackett Daemon
@@ -80,21 +81,25 @@ TimeoutStopSec=20
 [Install]
 WantedBy=multi-user.target
 EOF
+  else
+    log_err "Jackett.service file located, exiting"
+    exit 1
+  fi
   if [[ $? -eq 1 ]]; then
     log_err "creating .service file failed, exiting..."
     exit 1
   else
-    log "creating .service file"
+    log "created .service file"
   fi
   log "starting service"
   systemctl daemon-reload
-  systemctl start jacket.service
+  systemctl start jackett.service
   if [[ $? -ne 0 ]]; then
     log_err "starting service failed, exiting..."
     exit 1
   else
     log "Started service file successfully"
   fi
-
-
+  log "cleaning up install files"
+  rm /opt/Jackett.Binaries*.tar.gz
 fi
