@@ -19,6 +19,7 @@ PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25
 jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}')
 jackett_target=$(echo $jackett_ver)
 install_user=jlivin25
+backup_name=$(echo Jackett_$(date +%d.%m.%y_%H:%M))
 #
 #
 #+-------------------+
@@ -46,13 +47,19 @@ if [ -d "/opt/Jackett" ]; then
     log "Config file found, making backup"
     cp /home/$install_user/.config/Jackett/ServerConfig.json /home/$install_user/.config/ServerConfig.json
     log "backing up old files"
-    mv Jackett Jackett_"$date"
+    mv Jackett $backup_name
   else
     log_deb "No config file found, this might be an error"
   fi
   tar -xvf Jackett*.tar.gz
   if [[ $? -ne 0 ]]; then
     log_err "extracting Jackett failed, exiting"
+    exit 1
+  fi
+  log "setting install directory permissions"
+  chown $install_user:$install_user /opt/Jackett
+  if [[ $? -eq 1 ]]; then
+    log_err "chowning /opt/Radarr failed, exiting..."
     exit 1
   fi
   log "Starting jackett.service"
@@ -63,8 +70,8 @@ if [ -d "/opt/Jackett" ]; then
   else
     log "starting jackett.service failed"
   fi
-  rm ~/ServerConfig.json
-  rm Jackett.tar
+  rm /home/$install_user/.config/ServerConfig.json
+  rm Jackett*.tar.gz
 else
   log "No Jackett install detected, attempting install"
   cd /opt
@@ -76,9 +83,10 @@ else
 #    log_err "moving to /opt/ failed, exiting..."
 #    exit 1
 #  fi
+  log "setting install directory permissions"
   chown $install_user:$install_user /opt/Jackett
   if [[ $? -eq 1 ]]; then
-    log_err "chowning /opt/Radarr, exiting..."
+    log_err "chowning /opt/Radarr failed, exiting..."
     exit 1
   fi
   log "creating .service file"
