@@ -68,8 +68,9 @@ if [ -d "/opt/Jackett" ]; then
     log_err "Starting jackett.service failed"
     exit 1
   else
-    log "starting jackett.service failed"
+    log "starting jackett.service succeded"
   fi
+  log "deleting backups"
   rm /home/$install_user/.config/ServerConfig.json
   rm Jackett*.tar.gz
 else
