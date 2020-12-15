@@ -22,8 +22,29 @@ fi
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
 jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}')
 jackett_target=$(echo $jackett_ver)
-install_user=jlivin25
 backup_name=$(echo Jackett_$(date +%d.%m.%y_%H:%M))
+#
+#
+while getopts r:e:t:q:s:c:h flag
+do
+    case "${flag}" in
+        u) user_install=${OPTARG};;
+        h) helpFunction;;
+        ?) helpFunction;;
+    esac
+done
+#
+#
+#+-------------------------+
+#+---Configure user name---+
+#+-------------------------+
+if [[ $user_install == "" ]]; then
+  install_user=jlivin25
+else
+  install_user=$(echo $user_install)
+fi
+echo "quality selected is $quality"
+echo "quality selected is $quality" >> $log
 #
 #
 #+-------------------+
