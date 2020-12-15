@@ -34,14 +34,35 @@ if [ -d "/opt/Jackett" ]; then
   log "Jackett install detected, attempting update"
   cd /opt
   wget -q https://github.com/Jackett/Jackett/releases/download/$jackett_target/Jackett.Binaries.LinuxAMDx64.tar.gz
-  cp ~/.config/Jackett/ServerConfig.json ~/ServerConfig.json
+  log "Attempting to stop the service"
   systemctl stop jackett.service
-  #
-  if [ -d "Jackett" ]; then
-    mv Jackett Jackett_$stamp
+  if [[ $? -ne 0 ]]; then
+    log_err "stopping service failed, exiting..."
+    exit 1
+  else
+    log "Stopped service file successfully"
   fi
-  tar -xvf Jackett.tar
+  if [ -f /home/$install_user/.config/Jackett/ServerConfig.json ]; then
+    log "Config file found, making backup"
+    cp /home/$install_user/.config/Jackett/ServerConfig.json /home/$install_user/.config/ServerConfig.json
+    log "backing up old files"
+    mv Jackett Jackett_"$date"
+  else
+    log_deb "No config file found, this might be an error"
+  fi
+  tar -xvf Jackett*
+  if [[ $? -ne 0 ]]; then
+    log_err "extracting Jackett failed, exiting"
+    exit 1
+  fi
+  log "Starting jackett.service"
   systemctl start jackett.service
+  if [[ $? -ne 0 ]]; then
+    log_err "Starting jackett.service failed"
+    exit 1
+  else
+    log "starting jackett.service failed"
+  fi
   rm ~/ServerConfig.json
   rm Jackett.tar
 else
