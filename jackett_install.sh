@@ -50,7 +50,7 @@ if [ -d "/opt/Jackett" ]; then
   else
     log_deb "No config file found, this might be an error"
   fi
-  tar -xvf Jackett*
+  tar -xvf Jackett*.tar.gz
   if [[ $? -ne 0 ]]; then
     log_err "extracting Jackett failed, exiting"
     exit 1
@@ -70,7 +70,7 @@ else
   cd /opt
   log "downloading version $(echo $jackett_target)"
   wget -q https://github.com/Jackett/Jackett/releases/download/$jackett_target/Jackett.Binaries.LinuxAMDx64.tar.gz
-  tar -xvf Jackett*
+  tar -xvf Jackett*.tar.gz
 #  mv Jackett /opt/
 #  if [[ $? -eq 1 ]]; then
 #    log_err "moving to /opt/ failed, exiting..."
