@@ -1,5 +1,9 @@
 #!/bin/bash
 #
+#+-------------------+
+#+---"VERSION 2.0"---+
+#+-------------------+
+#
 # taken from here https://www.htpcguides.com/install-jackett-ubuntu-15-x-for-custom-torrents-in-sonarr/
 #
 #+---------------------------------------------+
