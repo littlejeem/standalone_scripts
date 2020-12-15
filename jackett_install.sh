@@ -25,7 +25,7 @@ jackett_target=$(echo $jackett_ver)
 backup_name=$(echo Jackett_$(date +%d.%m.%y_%H:%M))
 #
 #
-while getopts r:e:t:q:s:c:h flag
+while getopts u:h flag
 do
     case "${flag}" in
         u) user_install=${OPTARG};;
@@ -43,8 +43,6 @@ if [[ $user_install == "" ]]; then
 else
   install_user=$(echo $user_install)
 fi
-echo "quality selected is $quality"
-echo "quality selected is $quality" >> $log
 #
 #
 #+-------------------+
