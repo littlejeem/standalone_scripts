@@ -25,6 +25,22 @@ jackett_target=$(echo $jackett_ver)
 backup_name=$(echo Jackett_$(date +%d.%m.%y_%H:%M))
 #
 #
+#+-------------------+
+#+---Set functions---+
+#+-------------------+
+function helpFunction () {
+   echo ""
+   echo "Usage: $0 -u ####"
+   echo "Usage: $0"
+   echo -e "\t Running the script with no flags causes default behaviour"
+   echo -e "\t-u Use this flag to specify a user to install jackett under"
+   exit 1 # Exit script after printing help
+}
+#
+#
+#+-----------------------+
+#+---Set up user flags---+
+#+-----------------------+
 while getopts u:h flag
 do
     case "${flag}" in
