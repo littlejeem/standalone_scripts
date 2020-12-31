@@ -38,16 +38,16 @@ sudo -u $assigned_user mkdir -p $HOME/Music/Library/alacimports
 sudo -u $assigned_user mkdir -p $HOME/Music/Library/flacimports
 sudo -u $assigned_user mkdir -p $HOME/Music/Library/PlayUploads
 # library file sources
-sudo -u $assigned_user mkdir -p $HOME/.config/beets/alac
-sudo -u $assigned_user mkdir -p $HOME/.config/beets/flac
-sudo -u $assigned_user mkdir -p $HOME/.config/beets/uploads
+sudo -u $assigned_user mkdir -p $HOME/.config/ScriptSettings/beets/alac
+sudo -u $assigned_user mkdir -p $HOME/.config/ScriptSettings/beets/flac
+sudo -u $assigned_user mkdir -p $HOME/.config/ScriptSettings/beets/uploads
 #
 #
 #+-------------------------+
 #+---"Copy config files"---+
 #+-------------------------+
-sudo -u $assigned_user cp $dir_name/alac_config.yaml $HOME/.config/beets/alac/
-sudo -u $assigned_user cp $dir_name/flac_config.yaml $HOME/.config/beets/flac/
-sudo -u $assigned_user cp $dir_name/uploads_config.yaml $HOME/.config/beets/uploads/
+sudo -u $assigned_user cp $dir_name/alac_config.yaml $HOME/.config/ScriptSettings/beets/alac/
+sudo -u $assigned_user cp $dir_name/flac_config.yaml $HOME/.config/ScriptSettings/beets/flac/
+sudo -u $assigned_user cp $dir_name/uploads_config.yaml $HOME/.config/ScriptSettings/beets/uploads/
 #
 #
