@@ -46,8 +46,8 @@ sudo -u $assigned_user mkdir -p $HOME/.config/ScriptSettings/beets/uploads
 #+-------------------------+
 #+---"Copy config files"---+
 #+-------------------------+
-sudo -u $assigned_user cp $dir_name/alac_config.yaml $HOME/.config/ScriptSettings/beets/alac/
-sudo -u $assigned_user cp $dir_name/flac_config.yaml $HOME/.config/ScriptSettings/beets/flac/
-sudo -u $assigned_user cp $dir_name/uploads_config.yaml $HOME/.config/ScriptSettings/beets/uploads/
+sudo -u $assigned_user cp $dir_name/bin/control_scripts/beets_configs/alac_config.yaml $HOME/.config/ScriptSettings/beets/alac/
+sudo -u $assigned_user cp $dir_name/bin/control_scripts/beets_configs/flac_config.yaml $HOME/.config/ScriptSettings/beets/flac/
+sudo -u $assigned_user cp $dir_name/bin/control_scripts/beets_configs/uploads_config.yaml $HOME/.config/ScriptSettings/beets/uploads/
 #
 #
