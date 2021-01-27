@@ -55,7 +55,7 @@ timestamp ()
 #+---"Exit Codes"---+
 #+------------------+
 #
-# pick from 64 - 113
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
 # exit 0 = Success
 # exit 64 = Variable Error
 # exit 65 = Sourcing file error
@@ -63,6 +63,7 @@ timestamp ()
 # exit 67 = Required Program Missing
 #
 #place this in parent script immediately after the child script exits
+#reply=$?
 script_exit ()
 {
   reply=$?
