@@ -39,6 +39,26 @@ pushover ()
 }
 #
 #
+#+----------------------+
+#+---"Kodi Functions"---+
+#+----------------------+
+update_videolibrary () {
+  curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly
+}
+#
+update_musiclibrary () {
+  curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+}
+#
+clean_videolibrary () {
+  curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly
+}
+#
+clean_musiclibrary () {
+  curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+}
+#
+#
 #+---------------+
 #+---Timestamp---+
 #+---------------+
