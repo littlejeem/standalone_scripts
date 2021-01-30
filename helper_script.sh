@@ -106,3 +106,14 @@ script_exit ()
     log_deb "Script $scriptlong exited with generic bash error"
   fi
 }
+#
+#
+#+------------------------+
+#+---"Useful Variables"---+
+#+------------------------+
+#logname=$lockname.log # Uses the script name to create the log
+#stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
+#stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
+#dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+#
+#
