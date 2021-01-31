@@ -30,6 +30,27 @@ tty -s || function log_deb() { logger -t DEBUG $(basename $0) "$@"; }
 tty -s || function log_err() { logger -t ERROR $(basename $0) -p user.err "$@"; }
 #
 #
+#+-------------------------------+
+#+---"Check if already runnng"---+
+#+-------------------------------+
+check_running () {
+  temp_dir="$lockname"
+  if [[ -d "$lockname" ]]; then
+    while [[ -d "$lockname" ]]; do
+      log "previous script still running"
+      sleep 2m; done
+      #  else
+      log "no previously running script detected"
+  fi
+  log_deb "temp dir is set as: $lockname"
+  mkdir /tmp/"$lockname"
+  if [[ $? = 0 ]]; then
+    log "temp directory set successfully"
+  else
+    log_err "setting temp directory unsuccessfull, exiting"
+    exit 65
+  fi
+}
 #+------------------------+
 #+---Pushover Functions---+
 #+------------------------+
