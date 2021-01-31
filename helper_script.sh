@@ -108,6 +108,26 @@ script_exit ()
 }
 #
 #
+#+----------------------+
+#+---"Variable Tests"---+
+#+----------------------+
+fatal_missing_var () {
+ if [ -z "${JAIL_FATAL}" ]; then
+  log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+  rm -r "$temp_dir"
+  exit 64
+ else
+  log "variable found, using: $JAIL_FATAL"
+ fi
+}
+#
+debug_missing_var () {
+ if [ -z "${JAIL_DEBUG}" ]; then
+  log_deb "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
+ else
+  log "variable found, using: $JAIL_DEBUG"
+ fi
+}
 #+------------------------+
 #+---"Useful Variables"---+
 #+------------------------+
