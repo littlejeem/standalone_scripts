@@ -35,17 +35,18 @@ tty -s || function log_err() { logger -t ERROR $(basename $0) -p user.err "$@"; 
 #+-------------------------------+
 check_running () {
   temp_dir="$lockname"
-  if [[ -d "$lockname" ]]; then
-    while [[ -d "$lockname" ]]; do
+  if [[ -d /var/"$lockname" ]]; then
+    while [[ -d /var/"$lockname" ]]; do
       log "previous script still running"
       sleep 2m; done
       #  else
       log "no previously running script detected"
   fi
-  log_deb "temp dir is set as: $lockname"
+  log "Attempting to lock script"
   mkdir /tmp/"$lockname"
   if [[ $? = 0 ]]; then
-    log "temp directory set successfully"
+    log_deb "temp dir is set as: /tmp/$lockname"
+    log "temp directory set successfully, script locked"
   else
     log_err "setting temp directory unsuccessfull, exiting"
     exit 65
@@ -135,7 +136,7 @@ script_exit ()
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
   log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
-  rm -r "$temp_dir"
+  rm -r /tmp/"$lockname"
   exit 64
  else
   log "variable found, using: $JAIL_FATAL"
