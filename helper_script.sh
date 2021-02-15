@@ -111,19 +111,19 @@ script_exit ()
   reply=$?
   if [[ "$reply" = 0 ]]; then
     log "$scriptlong exited gracefully"
-  elif [ "$reply" = 64 ]]; then
+  elif [[ "$reply" = 64 ]]; then
     log_err "Exit code: $reply received"
     log_deb "Script $scriptlong exited with 'Variable' error"
-  elif [ "$reply" = 65 ]]; then
+  elif [[ "$reply" = 65 ]]; then
     log_err "Exit code: $reply received"
     log_deb "Script $scriptlong exited with 'sourcing script or config' error"
-  elif [ "$reply" = 65 ]]; then
+  elif [[ "$reply" = 65 ]]; then
     log_err "Exit code: $reply received"
     log_deb "Script $scriptlong exited with 'Processing' error"
-  elif [ "$reply" = 66 ]]; then
+  elif [[ "$reply" = 66 ]]; then
     log_err "Exit code: $reply received"
     log_deb "Script $scriptlong exited with 'Missing Program' error"
-  elif [ "$reply" = 1 ]]; then
+  elif [[ "$reply" = 1 ]]; then
     log_err "Exit code: $reply received"
     log_deb "Script $scriptlong exited with generic bash error"
   fi
@@ -134,7 +134,7 @@ script_exit ()
 #+---"Variable Tests"---+
 #+----------------------+
 fatal_missing_var () {
- if [ -z "${JAIL_FATAL}" ]; then
+ if [[ -z "${JAIL_FATAL}" ]]; then
   log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   rm -r /tmp/"$lockname"
   exit 64
@@ -144,7 +144,7 @@ fatal_missing_var () {
 }
 #
 debug_missing_var () {
- if [ -z "${JAIL_DEBUG}" ]; then
+ if [[ -z "${JAIL_DEBUG}" ]]; then
   log_deb "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
   log "variable found, using: $JAIL_DEBUG"
