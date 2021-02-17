@@ -15,9 +15,6 @@ colrst='\033[0m'    # Text Reset
 #+-----------------------+
 #+---Logging Functions---+
 #+-----------------------+
-#set default logging level
-verbosity=3
-#
 ### verbosity levels
 silent_lvl=0
 crt_lvl=1
