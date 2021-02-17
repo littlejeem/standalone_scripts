@@ -4,30 +4,63 @@
 #+---------------------+
 #+---Logging Colours---+
 #+---------------------+
-#error
-red='\033[0;31m'
-#warning
-yellow='\033[1;33m'
-#success
-green='\033[0;32m'
-#info
-brown_orange='\033[0;33m'
-#others
-purple='\033[0;35m'
-light_blue='\033[1;34m'
-#no colour
-nc='\033[0m'
+colblk='\033[0;30m' # Black - Regular
+colred='\033[0;31m' # Red
+colgrn='\033[0;32m' # Green
+colylw='\033[0;33m' # Yellow
+colpur='\033[0;35m' # Purple
+colrst='\033[0m'    # Text Reset
 #
 #
 #+-----------------------+
 #+---Logging Functions---+
 #+-----------------------+
-tty -s && function log()     {     echo "$(date +%b"  "%-d" "%T)" " "INFO: "$@"; }
-tty -s && function log_deb() {     echo "$(date +%b"  "%-d" "%T)" DEBUG: "$@"; }
-tty -s && function log_err() { >&2 echo "$(date +%b"  "%-d" "%T)" ERROR: "$@"; }
-tty -s || function log()     { logger -t INFO $(basename $0) "$@"; }
-tty -s || function log_deb() { logger -t DEBUG $(basename $0) "$@"; }
-tty -s || function log_err() { logger -t ERROR $(basename $0) -p user.err "$@"; }
+#set default logging level
+verbosity=3
+#
+### verbosity levels
+silent_lvl=0
+crt_lvl=1
+err_lvl=2
+wrn_lvl=3
+ntf_lvl=4
+inf_lvl=5
+dbg_lvl=6
+#
+## esilent prints output even in silent mode
+# terminal versions
+tty -s && esilent () { verb_lvl=$silent_lvl elog "$@"; }
+tty -s && enotify () { verb_lvl=$ntf_lvl elog "$@"; }
+tty -s && eok ()    { verb_lvl=$ntf_lvl elog "SUCCESS - $@"; }
+tty -s && ewarn ()  { verb_lvl=$wrn_lvl elog "${colylw}WARNING${colrst} - $@"; }
+tty -s && einfo ()  { verb_lvl=$inf_lvl elog "${colwht}INFO${colrst} ---- $@"; }
+tty -s && edebug () { verb_lvl=$dbg_lvl elog "${colgrn}DEBUG${colrst} --- $@"; }
+tty -s && eerror () { verb_lvl=$err_lvl elog "${colred}ERROR${colrst} --- $@"; }
+tty -s && ecrit ()  { verb_lvl=$crt_lvl elog "${colpur}FATAL${colrst} --- $@"; }
+tty -s && edumpvar () { for var in $@ ; do edebug "$var=${!var}" ; done }
+# syslog versions
+tty -s || esilent () { verb_lvl=$silent_lvl slog "["$(basename $0)"]" "$@" ;}
+tty -s || enotify () { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "$@" ;}
+tty -s || eok ()    { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "SUCCESS - $@"; }
+tty -s || ewarn ()  { verb_lvl=$wrn_lvl slog "["$(basename $0)"]" "WARNING - $@"; }
+tty -s || einfo ()  { verb_lvl=$inf_lvl slog "["$(basename $0)"]" "INFO ---- $@"; }
+tty -s || edebug () { verb_lvl=$dbg_lvl slog "["$(basename $0)"]" "DEBUG --- $@"; }
+tty -s || eerror () { verb_lvl=$err_lvl slog "["$(basename $0)"]" "ERROR --- $@"; }
+tty -s || ecrit ()  { verb_lvl=$crt_lvl slog "["$(basename $0)"]" "FATAL --- $@"; }
+tty -s || edumpvar () { for var in "$@" ; do edebug "$var=${!var}" ; done }
+# Error log function for terminal
+elog() {
+        if [ $verbosity -ge $verb_lvl ]; then
+          datestring=$(date +%b" "%-d" "%T)
+          echo -e "$datestring $HOSTNAME $USER "["scalable_logging"]" $@"
+        fi
+}
+# Error log function for syslog
+slog() {
+        if [ $verbosity -ge $verb_lvl ]; then
+          logger "$@"
+        fi
+}
 #
 #
 #+-------------------------------+
@@ -37,18 +70,18 @@ check_running () {
   temp_dir="$lockname"
   if [[ -d /var/"$lockname" ]]; then
     while [[ -d /var/"$lockname" ]]; do
-      log "previous script still running"
+      inf_lvl "previous script still running"
       sleep 2m; done
       #  else
-      log "no previously running script detected"
+      inf_lvl "no previously running script detected"
   fi
-  log "Attempting to lock script"
+  inf_lvl "Attempting to lock script"
   mkdir /tmp/"$lockname"
   if [[ $? = 0 ]]; then
-    log_deb "temp dir is set as: /tmp/$lockname"
-    log "temp directory set successfully, script locked"
+    dbg_lvl "temp dir is set as: /tmp/$lockname"
+    inf_lvl "temp directory set successfully, script locked"
   else
-    log_err "setting temp directory unsuccessfull, exiting"
+    err_lvl "setting temp directory unsuccessfull, exiting"
     exit 65
   fi
 }
@@ -110,22 +143,22 @@ script_exit ()
 {
   reply=$?
   if [[ "$reply" = 0 ]]; then
-    log "$scriptlong exited gracefully"
+    ntf_lvl "$scriptlong exited gracefully"
   elif [[ "$reply" = 64 ]]; then
-    log_err "Exit code: $reply received"
-    log_deb "Script $scriptlong exited with 'Variable' error"
+    err_lvl "Exit code: $reply received"
+    dbg_lvl "Script $scriptlong exited with 'Variable' error"
   elif [[ "$reply" = 65 ]]; then
-    log_err "Exit code: $reply received"
-    log_deb "Script $scriptlong exited with 'sourcing script or config' error"
+    err_lvl "Exit code: $reply received"
+    dbg_lvl "Script $scriptlong exited with 'sourcing script or config' error"
   elif [[ "$reply" = 65 ]]; then
-    log_err "Exit code: $reply received"
-    log_deb "Script $scriptlong exited with 'Processing' error"
+    err_lvl "Exit code: $reply received"
+    dbg_lvl "Script $scriptlong exited with 'Processing' error"
   elif [[ "$reply" = 66 ]]; then
-    log_err "Exit code: $reply received"
-    log_deb "Script $scriptlong exited with 'Missing Program' error"
+    err_lvl "Exit code: $reply received"
+    dbg_lvl "Script $scriptlong exited with 'Missing Program' error"
   elif [[ "$reply" = 1 ]]; then
-    log_err "Exit code: $reply received"
-    log_deb "Script $scriptlong exited with generic bash error"
+    err_lvl "Exit code: $reply received"
+    dbg_lvl "Script $scriptlong exited with generic bash error"
   fi
 }
 #
@@ -135,19 +168,19 @@ script_exit ()
 #+----------------------+
 fatal_missing_var () {
  if [[ -z "${JAIL_FATAL}" ]]; then
-  log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+  err_lvl "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   rm -r /tmp/"$lockname"
   exit 64
  else
-  log "variable found, using: $JAIL_FATAL"
+  inf_lvl "variable found, using: $JAIL_FATAL"
  fi
 }
 #
 debug_missing_var () {
  if [[ -z "${JAIL_DEBUG}" ]]; then
-  log_deb "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
+  dbg_lvl "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  log "variable found, using: $JAIL_DEBUG"
+  inf_lvl "variable found, using: $JAIL_DEBUG"
  fi
 }
 #+------------------------+
