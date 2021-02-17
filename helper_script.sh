@@ -67,18 +67,18 @@ check_running () {
   temp_dir="$lockname"
   if [[ -d /var/"$lockname" ]]; then
     while [[ -d /var/"$lockname" ]]; do
-      inf_lvl "previous script still running"
+      einfo "previous script still running"
       sleep 2m; done
       #  else
-      inf_lvl "no previously running script detected"
+      einfo "no previously running script detected"
   fi
-  inf_lvl "Attempting to lock script"
+  einfo "Attempting to lock script"
   mkdir /tmp/"$lockname"
   if [[ $? = 0 ]]; then
-    dbg_lvl "temp dir is set as: /tmp/$lockname"
-    inf_lvl "temp directory set successfully, script locked"
+    edebug "temp dir is set as: /tmp/$lockname"
+    einfo "temp directory set successfully, script locked"
   else
-    err_lvl "setting temp directory unsuccessfull, exiting"
+    eerror "setting temp directory unsuccessfull, exiting"
     exit 65
   fi
 }
@@ -142,20 +142,20 @@ script_exit ()
   if [[ "$reply" = 0 ]]; then
     ntf_lvl "$scriptlong exited gracefully"
   elif [[ "$reply" = 64 ]]; then
-    err_lvl "Exit code: $reply received"
-    dbg_lvl "Script $scriptlong exited with 'Variable' error"
+    eerror "Exit code: $reply received"
+    edebug "Script $scriptlong exited with 'Variable' error"
   elif [[ "$reply" = 65 ]]; then
-    err_lvl "Exit code: $reply received"
-    dbg_lvl "Script $scriptlong exited with 'sourcing script or config' error"
+    eerror "Exit code: $reply received"
+    edebug "Script $scriptlong exited with 'sourcing script or config' error"
   elif [[ "$reply" = 65 ]]; then
-    err_lvl "Exit code: $reply received"
-    dbg_lvl "Script $scriptlong exited with 'Processing' error"
+    eerror "Exit code: $reply received"
+    edebug "Script $scriptlong exited with 'Processing' error"
   elif [[ "$reply" = 66 ]]; then
-    err_lvl "Exit code: $reply received"
-    dbg_lvl "Script $scriptlong exited with 'Missing Program' error"
+    eerror "Exit code: $reply received"
+    edebug "Script $scriptlong exited with 'Missing Program' error"
   elif [[ "$reply" = 1 ]]; then
-    err_lvl "Exit code: $reply received"
-    dbg_lvl "Script $scriptlong exited with generic bash error"
+    eerror "Exit code: $reply received"
+    edebug "Script $scriptlong exited with generic bash error"
   fi
 }
 #
@@ -165,19 +165,19 @@ script_exit ()
 #+----------------------+
 fatal_missing_var () {
  if [[ -z "${JAIL_FATAL}" ]]; then
-  err_lvl "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+  eerror "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   rm -r /tmp/"$lockname"
   exit 64
  else
-  inf_lvl "variable found, using: $JAIL_FATAL"
+  einfo "variable found, using: $JAIL_FATAL"
  fi
 }
 #
 debug_missing_var () {
  if [[ -z "${JAIL_DEBUG}" ]]; then
-  dbg_lvl "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
+  edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  inf_lvl "variable found, using: $JAIL_DEBUG"
+  einfo "variable found, using: $JAIL_DEBUG"
  fi
 }
 #+------------------------+
