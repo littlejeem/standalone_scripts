@@ -27,8 +27,8 @@ dbg_lvl=6
 ## esilent prints output even in silent mode
 # terminal versions
 tty -s && esilent () { verb_lvl=$silent_lvl elog "$@"; }
-tty -s && enotify () { verb_lvl=$ntf_lvl elog "$@"; }
-tty -s && eok ()    { verb_lvl=$ntf_lvl elog "SUCCESS - $@"; }
+tty -s && enotify () { verb_lvl=$ntf_lvl elog "${colwht}INFO${colrst} --- $@"; }
+tty -s && eok ()    { verb_lvl=$ntf_lvl elog "${colrst}SUCCESS${colrst} - $@"; }
 tty -s && ewarn ()  { verb_lvl=$wrn_lvl elog "${colylw}WARNING${colrst} - $@"; }
 tty -s && einfo ()  { verb_lvl=$inf_lvl elog "${colwht}INFO${colrst} ---- $@"; }
 tty -s && edebug () { verb_lvl=$dbg_lvl elog "${colgrn}DEBUG${colrst} --- $@"; }
@@ -49,7 +49,7 @@ tty -s || edumpvar () { for var in "$@" ; do edebug "$var=${!var}" ; done }
 elog() {
         if [ $verbosity -ge $verb_lvl ]; then
           datestring=$(date +%b" "%-d" "%T)
-          echo -e "$datestring $HOSTNAME $USER "["scalable_logging"]" $@"
+          echo -e "$datestring $HOSTNAME $USER "["$lockname"]" $@"
         fi
 }
 # Error log function for syslog
