@@ -27,7 +27,7 @@ dbg_lvl=6
 ## esilent prints output even in silent mode
 # terminal versions
 tty -s && esilent () { verb_lvl=$silent_lvl elog "$@"; }
-tty -s && enotify () { verb_lvl=$ntf_lvl elog "${colwht}INFO${colrst} --- $@"; }
+tty -s && enotify () { verb_lvl=$ntf_lvl elog "${colwht}NOTICE${colrst} - $@"; }
 tty -s && eok ()    { verb_lvl=$ntf_lvl elog "${colrst}SUCCESS${colrst} - $@"; }
 tty -s && ewarn ()  { verb_lvl=$wrn_lvl elog "${colylw}WARNING${colrst} - $@"; }
 tty -s && einfo ()  { verb_lvl=$inf_lvl elog "${colwht}INFO${colrst} ---- $@"; }
@@ -37,7 +37,7 @@ tty -s && ecrit ()  { verb_lvl=$crt_lvl elog "${colpur}FATAL${colrst} --- $@"; }
 tty -s && edumpvar () { for var in $@ ; do edebug "$var=${!var}" ; done }
 # syslog versions
 tty -s || esilent () { verb_lvl=$silent_lvl slog "["$(basename $0)"]" "$@" ;}
-tty -s || enotify () { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "$@" ;}
+tty -s || enotify () { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "NOTICE - $@" ;}
 tty -s || eok ()    { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "SUCCESS - $@"; }
 tty -s || ewarn ()  { verb_lvl=$wrn_lvl slog "["$(basename $0)"]" "WARNING - $@"; }
 tty -s || einfo ()  { verb_lvl=$inf_lvl slog "["$(basename $0)"]" "INFO ---- $@"; }
