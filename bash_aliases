@@ -22,4 +22,6 @@ alias watch_log='tail -f /var/log/syslog'
 
 alias print_log='cat /var/log/syslog'
 
+alias edit_log='nano /var/log/syslog'
+
 alias calibre_add='read name && xvfb-run calibredb add /mnt/usbstorage/ebooks/"$name" --with-library http://localhost:8180'
