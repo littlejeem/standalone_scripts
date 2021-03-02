@@ -64,7 +64,6 @@ slog() {
 #+---"Check if already runnng"---+
 #+-------------------------------+
 check_running () {
-  temp_dir="$lockname"
   if [[ -d /var/"$lockname" ]]; then
     while [[ -d /var/"$lockname" ]]; do
       einfo "previous script still running"
