@@ -47,16 +47,16 @@ tty -s || ecrit ()  { verb_lvl=$crt_lvl slog "["$(basename $0)"]" "FATAL --- $@"
 tty -s || edumpvar () { for var in "$@" ; do edebug "$var=${!var}" ; done }
 # Error log function for terminal
 elog() {
-        if [ $verbosity -ge $verb_lvl ]; then
-          datestring=$(date +%b" "%-d" "%T)
-          echo -e "$datestring $HOSTNAME $USER "["$lockname"]" $@"
-        fi
+  if [ $verbosity -ge $verb_lvl ]; then
+    datestring=$(date +%b" "%-d" "%T)
+    echo -e "$datestring" "$HOSTNAME" "$USER" \[$lockname\] "$@"
+  fi
 }
 # Error log function for syslog
 slog() {
-        if [ $verbosity -ge $verb_lvl ]; then
-          logger "$@"
-        fi
+  if [ $verbosity -ge $verb_lvl ]; then
+    logger "$@"
+  fi
 }
 #
 #
