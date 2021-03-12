@@ -1,5 +1,6 @@
 #!/bin/sh
-
+#
+# thanks to https://github.com/tknr/cuesplit
 # frontend for:            cuetools, shntool, mp3splt
 # optional dependencies:    flac, mac, wavpack, ttaenc
 # v1.3 sen
@@ -27,7 +28,8 @@ echo -e "\
 Directory: $DIR
 ________________________________________
 "
-cd "$DIR"
+#https://github.com/koalaman/shellcheck/wiki/SC2164
+cd "$DIR" || exit
 TYPE=`ls -t1`
 
 case $TYPE in
