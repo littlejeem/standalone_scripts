@@ -4,8 +4,32 @@
 # frontend for:            cuetools, shntool, mp3splt
 # optional dependencies:    flac, mac, wavpack, ttaenc
 # v1.3 sen
-
-
+#
+#+--------------------------------------+
+#+---"Exit Codes & Logging Verbosity"---+
+#+--------------------------------------+
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
+# exit 0 = Success
+# exit 64 = Variable Error
+# exit 65 = Sourcing file/folder error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
+#
+#verbosity levels
+#silent_lvl=0
+#crt_lvl=1
+#err_lvl=2
+#wrn_lvl=3
+#ntf_lvl=4
+#inf_lvl=5
+#dbg_lvl=6
+#
+#
+#+-------------------+
+#+---"Main Script"---+
+#+-------------------+
+verbosity=2
+#
 SDIR=`pwd`
 
 if [ "$1" = "" ]
@@ -16,7 +40,7 @@ else
         -h | --help )
             echo "Usage: cuesplit [Path]"
             echo "       The default path is the current directory."
-            exit
+            exit 0
             ;;
         * )
         DIR=$1
@@ -29,7 +53,7 @@ Directory: $DIR
 ________________________________________
 "
 #https://github.com/koalaman/shellcheck/wiki/SC2164
-cd "$DIR" || exit
+cd "$DIR" || exit 65
 TYPE=`ls -t1`
 
 case $TYPE in
@@ -88,5 +112,6 @@ case $TYPE in
     * )
     echo "Error: Found no files to split!"
     echo "       --> APE, FLAC, MP3, OGG, TTA, WV, WAV"
+    exit 65
 esac
-exit
+exit 0
