@@ -61,52 +61,56 @@ case $TYPE in
         mkdir split
         shnsplit -d split -f *.cue -o "flac flac -V --best -o %f -" *.ape -t "%n %p - %t"
         rm -f split/00*pregap*
-        cuetag.sh *.cue split/*.flac
-        exit
+        #cuetag.sh *.cue split/*.flac
+        mv split/* .
+        rm -r split
+        exit 0
         ;;
 
     *.flac*)
         mkdir split
         shnsplit -d split -f *.cue -o "flac flac -V --best -o %f -" *.flac -t "%n %p - %t"
         rm -f split/00*pregap*
-        cuetag.sh *.cue split/*.flac
-        exit
+        #cuetag.sh *.cue split/*.flac
+        mv split/* .
+        rm -r split
+        exit 0
         ;;
 
     *.mp3*)
         mp3splt -no "@n @p - @t (split)" -c *.cue *.mp3
-        cuetag.sh *.cue *split\).mp3
-        exit
+        #cuetag.sh *.cue *split\).mp3
+        exit 0
         ;;
 
     *.ogg*)
         mp3splt -no "@n @p - @t (split)" -c *.cue *.ogg
-        cuetag.sh *.cue *split\).ogg
-        exit
+        #cuetag.sh *.cue *split\).ogg
+        exit 0
         ;;
 
     *.tta*)
         mkdir split
         shnsplit -d split -f *.cue -o "flac flac -V --best -o %f -" *.tta -t "%n %p - %t"
         rm -f split/00*pregap*
-        cuetag.sh *.cue split/*.flac
-        exit
+        #cuetag.sh *.cue split/*.flac
+        exit 0
         ;;
 
     *.wv*)
         mkdir split
         shnsplit -d split -f *.cue -o "flac flac -V --best -o %f -" *.wv -t "%n %p - %t"
         rm -f split/00*pregap*
-        cuetag.sh *.cue split/*.flac
-        exit
+        #cuetag.sh *.cue split/*.flac
+        exit 0
         ;;
 
     *.wav*)
         mkdir split
         shnsplit -d split -f *.cue -o "flac flac -V --best -o %f -" *.wav -t "%n %p - %t"
         rm -f split/00*pregap*
-        cuetag.sh *.cue split/*.flac
-        exit
+        #cuetag.sh *.cue split/*.flac
+        exit 0
         ;;
 
     * )
