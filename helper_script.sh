@@ -4,6 +4,7 @@
 #+---------------------+
 #+---Logging Colours---+
 #+---------------------+
+colwht='\033[1;37m' # White - Regular
 colblk='\033[0;30m' # Black - Regular
 colred='\033[0;31m' # Red
 colgrn='\033[0;32m' # Green
