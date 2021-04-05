@@ -67,18 +67,18 @@ slog() {
 check_running () {
   if [[ -d /var/"$lockname" ]]; then
     while [[ -d /var/"$lockname" ]]; do
-      einfo "previous script still running"
+      ewarn "previous script still running"
       sleep 2m; done
       #  else
-      einfo "no previously running script detected"
+      edebug "no previously running script detected"
   fi
-  einfo "Attempting to lock script"
+  edebug "Attempting to lock script"
   mkdir /tmp/"$lockname"
   if [[ $? = 0 ]]; then
     edebug "temp dir is set as: /tmp/$lockname"
-    einfo "temp directory set successfully, script locked"
+    edebug "temp directory set successfully, script locked"
   else
-    eerror "setting temp directory unsuccessfull, exiting"
+    error "setting temp directory unsuccessfull, exiting"
     exit 65
   fi
 }
@@ -180,6 +180,25 @@ debug_missing_var () {
   einfo "variable found, using: $JAIL_DEBUG"
  fi
 }
+#
+#
+#+----------------------+
+#+---"Progress bar"-----+
+#+----------------------+
+#thanks to here https://stackoverflow.com/questions/12498304/using-bash-to-display-a-progress-indicator
+progress_bar () {
+  echo "THIS MAY TAKE A WHILE, PLEASE BE PATIENT WHILE $scriptlong IS RUNNING..."
+  printf "["
+  # While process is running...
+  while kill -0 $pid_name 2> /dev/null; do
+      printf  "▓"
+      sleep 1
+  done
+  printf "] done!"
+  echo ""
+}
+#
+#
 #+------------------------+
 #+---"Useful Variables"---+
 #+------------------------+
