@@ -160,9 +160,9 @@ script_exit ()
 }
 #
 #
-#+----------------------+
-#+---"Variable Tests"---+
-#+----------------------+
+#+--------------------------------+
+#+---"Variable & Program Tests"---+
+#+--------------------------------+
 fatal_missing_var () {
  if [[ -z "${JAIL_FATAL}" ]]; then
   eerror "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
@@ -181,6 +181,23 @@ debug_missing_var () {
  fi
 }
 #
+#you must pass the completed variable program_check to this function, eg program_check=unzip
+prog_check () {
+  if ! command -v "$program_check" &> /dev/null
+  then
+    eerror "$program_check could not be found, script won't function wihout it, attempting install"
+    apt update && apt install "$program_check" -y
+    if ! command -v "$program_check" &> /dev/null
+    then
+      eerror "$program_check install failed, scripts won't function wihout it, exiting"
+      exit 67
+    else
+      edebug "$program_check now installed, continuing"
+    fi
+  else
+      enotify "$program_check command located, continuing"
+  fi
+}
 #
 #+----------------------+
 #+---"Progress bar"-----+
