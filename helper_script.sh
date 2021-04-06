@@ -186,8 +186,9 @@ prog_check () {
   if ! command -v "$program_check" &> /dev/null
   then
     ewarn "$program_check could not be found, script won't function wihout it, attempting install"
-    apt update && apt install "$program_check" -y
-    sleep 10s
+    apt update > /dev/null 2>&1
+    apt install "$program_check" -y > /dev/null 2>&1
+    sleep 3s
     if ! command -v "$program_check" &> /dev/null
     then
       eerror "$program_check install failed, scripts won't function wihout it, exiting"
