@@ -185,7 +185,7 @@ debug_missing_var () {
 prog_check () {
   if ! command -v "$program_check" &> /dev/null
   then
-    eerror "$program_check could not be found, script won't function wihout it, attempting install"
+    ewarn "$program_check could not be found, script won't function wihout it, attempting install"
     apt update && apt install "$program_check" -y
     sleep 10s
     if ! command -v "$program_check" &> /dev/null
