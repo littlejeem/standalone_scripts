@@ -187,6 +187,7 @@ prog_check () {
   then
     eerror "$program_check could not be found, script won't function wihout it, attempting install"
     apt update && apt install "$program_check" -y
+    sleep 10s
     if ! command -v "$program_check" &> /dev/null
     then
       eerror "$program_check install failed, scripts won't function wihout it, exiting"
@@ -198,6 +199,18 @@ prog_check () {
       enotify "$program_check command located, continuing"
   fi
 }
+#
+#
+# Must pass in or prepost the function with $service_name
+Check_Service_ActiveState () {
+  #this will return the active / inactive service state
+  check2=$(systemctl show -p ActiveState --value $service_name.service)
+}
+Check_Service_SubState () {
+  #this will return the service running / exited / dead substate
+  check=$(systemctl show -p SubState --value $service_name.service)
+}
+#
 #
 #+----------------------+
 #+---"Progress bar"-----+
