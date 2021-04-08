@@ -205,7 +205,7 @@ prog_check () {
 # Must pass in or prepost the function with $service_name
 Check_Service_ActiveState () {
   #this will return the active / inactive service state
-  check2=$(systemctl show -p ActiveState --value $service_name.service)
+  check=$(systemctl show -p ActiveState --value $service_name.service)
 }
 Check_Service_SubState () {
   #this will return the service running / exited / dead substate
