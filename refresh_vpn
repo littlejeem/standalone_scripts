@@ -1,0 +1,318 @@
+#!/usr/bin/env bash
+#
+#+------------------+
+#+---"Exit Codes"---+
+#+------------------+
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
+# exit 0 = Success
+# exit 64 = Variable Error
+# exit 65 = Sourcing file/folder error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
+#
+#
+#+------------------------+
+#+---"Verbosity Levels"---+
+#+------------------------+
+#silent_lvl=0
+#crt_lvl=1
+#err_lvl=2
+#wrn_lvl=3
+#ntf_lvl=4
+#inf_lvl=5
+#dbg_lvl=6
+#
+#+---------------------------+
+#+---Set Version & Logging---+
+#+---------------------------+
+version="1.0"
+#
+#
+#+---------------------+
+#+---"Set Variables"---+
+#+---------------------+
+verbosity=4
+#
+#+---------------------------------------------+
+#+---check running as root before continuing---+
+#+---------------------------------------------+
+if [[ $EUID -ne 0 ]]; then
+    echo "Please run this script with sudo:"
+    echo "sudo $0 $*"
+    exit 1
+fi
+#
+#
+#+---------------------+
+#+---"Set Variables"---+
+#+---------------------+
+PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/pi/.local/bin:/home/pi/bin
+source "$HOME"/bin/standalone_scripts/helper_script.sh
+backup_name=$(echo -$(date +%d.%m.%y_%H:%M))
+scriptlong="refresh_vpn.sh" # imports the name of this script
+lockname=${scriptlong::-3} # reduces the name to remove .sh
+script_pid=$(echo $$)
+#
+#
+#+-------------------+
+#+---Set functions---+
+#+-------------------+
+helpFunction () {
+   echo ""
+   echo "Usage: $0 -u"
+   echo -e "\t Either -u or -t must be set, flags need no arguements and can be combined, eg. $0 -uG"
+   echo -e "\t -t Use this flag to specify tcp protocol"
+   echo -e "\t -u Use this flag to specify udp protocol"
+   echo -e "\t -s Override set verbosity to specify silent log level"
+   echo -e "\t -V Override set verbosity to specify verbose log level"
+   echo -e "\t -G Override set verbosity to specify Debug log level"
+   exit 0 # Exit script after printing help
+}
+#
+Check_Service () {
+  check=$(systemctl show -p SubState --value $service_name.service)
+}
+#
+#
+#+-----------------------+
+#+---Set up user flags---+
+#+-----------------------+
+#make sure a flag is provided
+if ( ! getopts "tusVGh" opt); then
+  helpFunction
+fi
+#
+#get inputs
+OPTIND=1
+while getopts ":tusVGh:" opt
+do
+    case "${opt}" in
+      t) protocol="tcp"
+      enotify "-t specified: using tcp";;
+      u) protocol="udp"
+      enotify "-u specified: using udp";;
+      s) verbosity=$silent_lvl
+      enotify "-s specified: Silent mode";;
+      V) verbosity=$inf_lvl
+      enotify "-V specified: Verbose mode";;
+      G) verbosity=$dbg_lvl
+      enotify "-G specified: Debug mode";;
+      h) helpFunction;;
+      ?) helpFunction;;
+    esac
+done
+shift $((OPTIND -1))
+#
+#check either -t or -u are set
+if [ -z "$protocol" ]; then
+   helpFunction
+fi
+#
+#
+#+------------------+
+#+---Start Script---+
+#+------------------+
+enotify "$scriptlong started"
+edebug "PID is: $script_pid"
+
+#first grab the new best location file name from user from https://nordvpn.com/servers/tools/
+echo "Please navigate to https://nordvpn.com/servers/tools/ and grab the up to date ovpn name, copy and paste it here"
+read new_ovpn
+edebug "new ovpn is $new_ovpn"
+
+#check for necessary installed programs
+program_check="unzip"
+prog_check
+
+#program_check=openvpn
+#prog_check
+
+#stop existing services
+edebug "shutting down running services"
+service_name="transmission-daemon"
+Check_Service_ActiveState
+if [ "$check" == "active" ]; then
+  edebug "$service_name service detected, stopping"
+  systemctl stop "$service_name"
+  Check_Service_ActiveState
+  if [ "$check" != "active" ]; then
+    edebug "$service_name service successfully stopped"
+  else
+    eerror "$service_name failed to be stopped"
+    exit 66
+  fi
+else
+  edebug "$service_name not detected as running"
+fi
+#
+service_name="openvpn"
+Check_Service_ActiveState
+if [ "$check" == "active" ]; then
+  edebug "$service_name service detected, stopping"
+  systemctl stop "$service_name"
+  Check_Service_ActiveState
+  if [ "$check" != "active" ]; then
+    edebug "$service_name service successfully stopped"
+  else
+    eerror "$service_name failed to be stopped"
+    exit 66
+  fi
+else
+  edebug "$service_name not detected as running"
+fi
+
+#Navigate to the OpenVPN configuration directory:
+if [ -d /etc/openvpn ]; then
+  cd /etc/openvpn
+  edebug "moved to desired folder successfully"
+else
+  no openvpn folder found, exiting
+  exit 65
+fi
+
+#update availiable ovpns by downloading the OpenVPN configuration files:
+edebug "download source files"
+wget -q https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip
+#> /dev/null 2>
+if [ $? != 0 ]; then
+  wget_error=$?
+  edebug "$wget_error"
+  eerror "wget returned an error code: $wget_error, exiting"
+  exit 66
+else
+  edebug "completed download of file successfully"
+fi
+
+#Extract ovpn.zip with the command:
+edebug "extracting download file"
+unzip -qq ovpn.zip
+if [ $? != 0 ]; then
+  unzip_error=$?
+  edebug "$unzip_error"
+  eerror "sed returned an error code: $unzip_error, exiting"
+  exit 66
+else
+  edebug "unzip operation successful"
+fi
+
+#Remove the files you will no longer use:
+ovpn_file="/etc/openvpn/ovpn.zip"
+check_file="$ovpn_file"
+if [ -f "$check_file" ]; then
+  edebug "$check_file detected, removing"
+  rm "$check_file"
+  if [ $? != 0 ]; then
+    error "rm command returned non zero, exiting script"
+    exit 66
+  else
+    edebug "successfully deleted $check_file"
+  fi
+else
+  ecrit "critical error, $check_file expected but not found"
+fi
+
+#back up existing files
+openvpn_login="/etc/openvpn/login"
+check_file="$openvpn_login"
+if [ -f "$check_file" ]; then
+  edebug "$check_file detected, backing up"
+  cp "$check_file" "$check_file""$backup_name"
+  if [ $? != 0 ]; then
+    error "cp command returned non zero, exiting script"
+    exit 66
+  else
+    edebug "successfully backed up: $check_file"
+  fi
+fi
+#
+openvpn_client="/etc/openvpn/client.conf"
+check_file="$openvpn_client"
+if [ -f "$check_file" ]; then
+  edebug "$check_file detected, backing up"
+  cp "$check_file" "$check_file""$backup_name"
+  if [ $? != 0 ]; then
+    error "cp command returned non zero, exiting script"
+    exit 66
+  else
+    edebug "successfully backed up: $check_file"
+  fi
+fi
+
+#copy new ovpn to be the client.conf
+openvpn_newclient="/etc/openvpn/ovpn_udp/"$new_ovpn"."$protocol".ovpn"
+check_file="$openvpn_newclient"
+if [ -f "$check_file" ]; then
+  edebug "$check_file detected, copying to client.conf"
+  cp "$check_file" $openvpn_client
+  if [ $? != 0 ]; then
+    error "cp command returned non zero, exiting script"
+    exit 66
+  else
+    edebug "successfully put in place new client.conf"
+  fi
+fi
+
+#edit new file to replace passwork with correct location
+#sed -i 's/old-text/new-text/g' input.txt #where the / after the first 's' is the delimiter, this can be anything
+sed -i "s#auth-user-pass#auth-user-pass /etc/openvpn/login#g" client.conf
+if [ $? != 0 ]; then
+  sed_error=$?
+  edebug "$sed_error"
+  eerror "sed returned an error code: $sed_error, exiting"
+  exit 66
+else
+  edebug "auth-user-pass ammended successfully"
+fi
+
+#tidy up temp folders
+if [ -d /etc/openvpn/ovpn_tcp ]; then
+  rm -r /etc/openvpn/ovpn_tcp
+  edebug "ovpn_tcp folder removed"
+else
+  edebug "no ovpn_tcp folder found, exiting"
+  exit 65
+fi
+#
+if [ -d /etc/openvpn/ovpn_udp ]; then
+  rm -r /etc/openvpn/ovpn_udp
+  edebug "ovpn_udp folder removed"
+else
+  edebug "no ovpn_udp folder found, exiting"
+  exit 65
+fi
+
+#Restart previously stopped services
+service_name="openvpn"
+Check_Service_ActiveState
+if [ "$check" == "inactive" ]; then
+  edebug "$service_name stopped, starting"
+  systemctl start "$service_name"
+  Check_Service_ActiveState
+  if [ "$check" != "inactive" ]; then
+    edebug "$service_name service successfully started"
+  else
+    eerror "$service_name failed to start"
+    exit 66
+  fi
+else
+  ewarn "something went wrong in trying to start $service_name"
+fi
+#
+service_name="transmission-daemon"
+Check_Service_ActiveState
+if [ "$check" == "inactive" ]; then
+  edebug "$service_name stopped, starting"
+  systemctl start "$service_name"
+  Check_Service_ActiveState
+  if [ "$check" != "inactive" ]; then
+    edebug "$service_name service successfully started"
+  else
+    eerror "$service_name failed to start"
+    exit 66
+  fi
+else
+  ewarn "something went wrong in trying to start $service_name"
+fi
+#
+enotify "$scriptlong completed"
+exit 0
