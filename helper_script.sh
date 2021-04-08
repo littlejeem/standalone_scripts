@@ -197,7 +197,7 @@ prog_check () {
       edebug "$program_check now installed, continuing"
     fi
   else
-      enotify "$program_check command located, continuing"
+      edebug "$program_check command located, continuing"
   fi
 }
 #
