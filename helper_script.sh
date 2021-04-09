@@ -65,7 +65,7 @@ slog() {
 #+---"Check if already runnng"---+
 #+-------------------------------+
 check_running () {
-  if [[ -d /var/"$lockname" ]]; then
+  if [[ -d /tmp/"$lockname" ]]; then
     while [[ -d /var/"$lockname" ]]; do
       ewarn "previous script still running"
       sleep 2m; done
@@ -78,7 +78,7 @@ check_running () {
     edebug "temp dir is set as: /tmp/$lockname"
     edebug "temp directory set successfully, script locked"
   else
-    error "setting temp directory unsuccessfull, exiting"
+    eerror "setting temp directory unsuccessfull, exiting"
     exit 65
   fi
 }
