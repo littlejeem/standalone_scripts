@@ -26,7 +26,7 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="0.2"
+version="0.3"
 #
 #
 #+---------------------+
@@ -70,10 +70,11 @@ check_running
 #+-------------------+
 helpFunction () {
    echo ""
-   echo "Usage: $0 -b "/home/bar" -u foo -dV"
+   echo "Usage: $0 -b /home/bar -u foo -dV"
    echo -e "\t -b Use this flag to specify folder to backup to, enter as an arguement to this flag"
    echo -e "\t -u Use this flag to specify backup user, enter as an arguement to this flag"
    echo -e "\t -d Use this flag to specify dry-run mode, no back up will be made"
+   echo -e "\t -r Use this flag to specify calling remote sync at end of script"
    echo -e "\t -s Override set verbosity to specify silent log level"
    echo -e "\t -V Override set verbosity to specify verbose log level"
    echo -e "\t -G Override set verbosity to specify Debug log level"
@@ -92,7 +93,7 @@ helpFunction () {
 #+-----------------------+
 #get inputs
 OPTIND=1
-while getopts ":b:u:dsVGh:" opt
+while getopts ":b:u:drsVGh:" opt
 do
     case "${opt}" in
       b) backupfolder="${OPTARG}"
@@ -101,6 +102,8 @@ do
       enotify "-u specified, user is: $username";;
       d) dryrun="1"
       enotify "-d specified, running in dry-run mode";;
+      r) remote_sync="1"
+      enotify "-r specified, calling remote sync at finish";;
       s) verbosity=$silent_lvl
       enotify "-s specified: Silent mode";;
       V) verbosity=$inf_lvl
@@ -120,8 +123,18 @@ shift $((OPTIND -1))
 enotify "$scriptlong started"
 edebug "PID is: $script_pid"
 if [[ $dryrun != "1" ]]; then
-  #statements
-  mkdir -p $backupfolder
+  if [[ -d "$backupfolder" ]]; then
+    edebug "backup location found"
+  else
+    edebug "no backup location found, attempting to create"
+    mkdir -p "$backupfolder"
+    if [[ "$?" != 0 ]]; then
+      edebug "error creating backup location, please check"
+      exit 65
+    else
+      edebug "successfully created backup folder"
+    fi
+  fi
   cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
   touch backup.tar.gz
   tar -cvpzf backup.tar.gz \
@@ -151,21 +164,29 @@ if [[ $dryrun != "1" ]]; then
 else
   edebug "running in dry-mode, no back-up created"
 fi
-#
-#
-#+---------------------+
-#+---CHECK FOR ERROR---+
-#+---------------------+
-if [ "$?" == "0" ]
- then
+#check for errors
+if [ "$?" == "0" ]; then
   edebug "backup completed successfully"
   #mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
   edebug "tar backup ** $stamp_$sysname_backup.tar.gz ** completed successfully"
- else
-  ewarn "tar backup process produced an error"
+else
+  capture="$?"
+  ewarn "tar backup process produced an error, error code $capture"
   exit 66
 fi
 #
+#
+#+---------------------+
+#+---Run remote sync---+
+#+---------------------+
+if [[ "$remote_sync" == "1" ]]; then
+  edebug "running remote sync of backup"
+fi
+#
+#
+#+----------------+
+#+---End Script---+
+#+----------------+
 if [[ -d "/tmp/$lockname" ]]; then
   rm -r "/tmp/$lockname"
 else
