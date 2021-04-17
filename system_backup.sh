@@ -26,7 +26,7 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="0.3"
+version="0.5"
 #
 #
 #+---------------------+
@@ -57,6 +57,17 @@ backupfolder="/home/$username/SysBackups" #where to store the backups
 scriptlong="system_backup.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
+#rclone
+#rclone_path=""
+#rclone_method=""
+#rclone_source=""
+#rclone_remote_name=""
+#rclone_remote_destination=""
+rclone_path="/usr/bin/rclone"
+rclone_method="copy"
+rclone_source="$backupfolder"
+rclone_remote_name="mediapc-jotta"
+rclone_remote_destination="ubuntu_sys_backups"
 #
 #
 #+---------------------------------------+
@@ -85,6 +96,35 @@ helpFunction () {
      exit 65
    fi
    exit 0 # Exit script after printing help, and all else successful
+}
+#
+run_backup () {
+  tar -cpzf backup.tar.gz \
+  --exclude=/backup.tar.gz \
+  --exclude=/$backupfolder \
+  --exclude=/proc \
+  --exclude=/tmp \
+  --exclude=/opt/calibre \
+  --exclude=/mnt \
+  --exclude=/dev \
+  --exclude=/sys \
+  --exclude=/run \
+  --exclude=/snap \
+  --exclude=/sys \
+  --exclude=/var \
+  --exclude=/lib \
+  --exclude=/media \
+  --exclude=/var/log \
+  --exclude=/var/cache/apt/archives \
+  --exclude=/usr/src/linux-headers* \
+  --exclude=/home/*/.gvfs \
+  --exclude=/home/*/.cache \
+  --exclude=/home/*/Downloads \
+  --exclude=/home/*/Music \
+  --exclude=/home/*/Videos \
+  --exclude=/home/*/temp \
+  --exclude=/home/*/.kodi/userdata/Thumbnails \
+  --exclude=/home/*/.local/share/Trash /
 }
 #
 #
@@ -124,63 +164,77 @@ enotify "$scriptlong started"
 edebug "PID is: $script_pid"
 if [[ $dryrun != "1" ]]; then
   if [[ -d "$backupfolder" ]]; then
-    edebug "backup location found"
+    edebug "backup location found, using: $backupfolder"
   else
-    edebug "no backup location found, attempting to create"
+    edebug "no backup location found, attempting to create: $backupfolder"
     mkdir -p "$backupfolder"
     if [[ "$?" != 0 ]]; then
-      edebug "error creating backup location, please check"
+      edebug "error creating backup location: $backupfolder, please check"
       exit 65
     else
-      edebug "successfully created backup folder"
+      edebug "successfully created backup folder: $backupfolder"
     fi
   fi
+  edebug "moving to root folder for back up"
   cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
+  if [ "$?" != "0" ]; then
+    capture="$?"
+    ecrit "moving to root failed, error code $capture"
+    exit 65
+  else
+    edebug "moving to root successful"
+  fi
   touch backup.tar.gz
-  tar -cvpzf backup.tar.gz \
-  --exclude=/backup.tar.gz \
-  --exclude=/$backupfolder \
-  --exclude=/proc \
-  --exclude=/tmp \
-  --exclude=/mnt \
-  --exclude=/dev \
-  --exclude=/sys \
-  --exclude=/run \
-  --exclude=/sys \
-  --exclude=/var \
-  --exclude=/lib \
-  --exclude=/media \
-  --exclude=/var/log \
-  --exclude=/var/cache/apt/archives \
-  --exclude=/usr/src/linux-headers* \
-  --exclude=/home/*/.gvfs \
-  --exclude=/home/*/.cache \
-  --exclude=/home/*/Downloads \
-  --exclude=/home/*/Music \
-  --exclude=/home/*/Videos \
-  --exclude=/home/*/temp \
-  --exclude=/home/*/.kodi/userdata/Thumbnails \
-  --exclude=/home/*/.local/share/Trash /
+  run_backup > /dev/null 2>&1 &
+  backup_pid=
+  pid_name=$backup_pid
+  edebug "cuesplit PID is: $backup_pid, recorded as PID_name: $pid_name"
+  if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
+    progress_bar
+  fi
 else
   edebug "running in dry-mode, no back-up created"
 fi
 #check for errors
-if [ "$?" == "0" ]; then
-  edebug "backup completed successfully"
-  #mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
-  edebug "tar backup ** $stamp_$sysname_backup.tar.gz ** completed successfully"
-else
-  capture="$?"
+capture="$?"
+if [ "$capture" != "0" ]; then
   ewarn "tar backup process produced an error, error code $capture"
   exit 66
+else
+  #if no errors rename backup file and move to local storage
+  edebug "tar backup ** $stamp_$sysname_backup.tar.gz ** completed successfully, moving..."
+  mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
+  capture="$?"
+  if [ "$capture" != "0" ]; then
+    ewarn "moving created backup failed, error code $capture"
+    exit 66
+  else
+    edebug "backup file successfully moved to backupfolder: $backupfolder"
+  fi
 fi
 #
 #
-#+---------------------+
-#+---Run remote sync---+
-#+---------------------+
+#+-----------------+
+#+---Remote sync---+
+#+-----------------+
 if [[ "$remote_sync" == "1" ]]; then
   edebug "running remote sync of backup"
+  if [[ "$dryrun" != "1" ]]; then
+    cd /$backupfolder/
+    #  rclone copy /$backupfolder mediapc-jotta:backup
+    #  rclone copy ~/Kodi_Test_Audio/Spring\ -\ Blender\ Open\ Movie.mp4 mediapc-jotta:ubuntu_sys_backups
+    rclone "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination"
+    if [ "$?" != "0" ]; then
+      capture="$?"
+      ewarn "remote backup process produced an error, error code $capture"
+    else
+      edebug "remote backup completed successfully"
+    fi
+  else
+    edebug "dryrun enabled, remote sync section triggered but no files transferred"
+  fi
+else
+  edebug "remote backup sync disabled"
 fi
 #
 #
