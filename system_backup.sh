@@ -26,7 +26,11 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
+<<<<<<< HEAD
 version="0.4"
+=======
+version="0.5"
+>>>>>>> 3a7f92b3422fce3c3e0aae1896c3b1184743238b
 #
 #
 #+---------------------+
@@ -186,7 +190,11 @@ if [[ $dryrun != "1" ]]; then
   fi
   touch backup.tar.gz
   run_backup > /dev/null 2>&1 &
+<<<<<<< HEAD
   backup_pid=$!
+=======
+  backup_pid=
+>>>>>>> 3a7f92b3422fce3c3e0aae1896c3b1184743238b
   pid_name=$backup_pid
   edebug "cuesplit PID is: $backup_pid, recorded as PID_name: $pid_name"
   if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
