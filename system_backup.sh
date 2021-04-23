@@ -186,6 +186,7 @@ if [[ $dryrun != "1" ]]; then
     edebug "moving to root successful"
   fi
   touch backup.tar.gz
+  enotify "Backup started"
   if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
     run_backup > /dev/null 2>&1 &
     backup_pid=$!
@@ -211,8 +212,28 @@ if [[ $dryrun != "1" ]]; then
       fi
     fi
   else
-    edebug "running in dry-mode, no back-up created"
+    run_backup
+    capture="$?"
+    if [ "$capture" != "0" ]; then
+      ewarn "tar backup process produced an error, error code $capture"
+      rm -r "/tmp/$lockname"
+      exit 66
+    else
+      #if no errors rename backup file and move to local storage
+      edebug "tar backup ** "$stamp"_"$sysname"_backup.tar.gz ** completed successfully, moving..."
+      mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
+      capture="$?"
+      if [ "$capture" != "0" ]; then
+        ewarn "moving created backup failed, error code $capture"
+        rm -r "/tmp/$lockname"
+        exit 66
+      else
+        edebug "backup file successfully moved to backupfolder: $backupfolder"
+      fi
+    fi    
   fi
+else
+  edebug "running in dry-mode, no back-up created"
 fi
 #
 #
