@@ -26,7 +26,7 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="0.4"
+version="0.5"
 #
 #
 #+---------------------+
@@ -49,10 +49,11 @@ fi
 #+---------------------+
 username=jlivin25 #name of the system user doing the backup
 PATH=/sbin:/bin:/usr/bin:/home/"$username"
-source "$HOME"/bin/standalone_scripts/helper_script.sh
-log="$HOME"/bin/script_logs/system_backup.sh
+#HOME="/home/$username"
+source /home/jlivin25/bin/standalone_scripts/helper_script.sh
+#log="$HOME"/bin/script_logs/system_backup.sh
 stamp=$(echo "`date +%d%m%Y`-`date +%H%M`") #create a timestamp for our backup
-sysname="mediapc_test"
+sysname="vm_test"
 backupfolder="/home/$username/SysBackups" #where to store the backups
 scriptlong="system_backup.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
@@ -66,8 +67,8 @@ script_pid=$(echo $$)
 rclone_path="/usr/bin/rclone"
 rclone_method="copy"
 rclone_source="$backupfolder"
-rclone_remote_name="mediapc-jotta"
-rclone_remote_destination="ubuntu_sys_backups"
+rclone_remote_name="jottacloud"
+rclone_remote_destination="vm_tests"
 #
 #
 #+---------------------------------------+
@@ -101,7 +102,7 @@ helpFunction () {
 run_backup () {
   tar -cpzf backup.tar.gz \
   --exclude=/backup.tar.gz \
-  --exclude=/$backupfolder \
+  --exclude=/"$backupfolder" \
   --exclude=/proc \
   --exclude=/tmp \
   --exclude=/opt/calibre \
@@ -177,39 +178,40 @@ if [[ $dryrun != "1" ]]; then
   fi
   edebug "moving to root folder for back up"
   cd / # THIS CD IS IMPORTANT THE FOLLOWING LONG COMMAND IS RUN FROM /
-  if [ "$?" != "0" ]; then
-    capture="$?"
+  capture="$?"
+  if [ "$capture" != "0" ]; then
     ecrit "moving to root failed, error code $capture"
     exit 65
   else
     edebug "moving to root successful"
   fi
   touch backup.tar.gz
-  run_backup > /dev/null 2>&1 &
-  backup_pid=$!
-  pid_name=$backup_pid
-  edebug "cuesplit PID is: $backup_pid, recorded as PID_name: $pid_name"
   if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
+    run_backup > /dev/null 2>&1 &
+    backup_pid=$!
+    pid_name=$backup_pid
+    edebug "backup PID is: $backup_pid, recorded as PID_name: $pid_name"
     progress_bar
-  fi
-else
-  edebug "running in dry-mode, no back-up created"
-fi
-#check for errors
-capture="$?"
-if [ "$capture" != "0" ]; then
-  ewarn "tar backup process produced an error, error code $capture"
-  exit 66
-else
-  #if no errors rename backup file and move to local storage
-  edebug "tar backup ** $stamp_$sysname_backup.tar.gz ** completed successfully, moving..."
-  mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
-  capture="$?"
-  if [ "$capture" != "0" ]; then
-    ewarn "moving created backup failed, error code $capture"
-    exit 66
+    capture="$?"
+    if [ "$capture" != "0" ]; then
+      ewarn "tar backup process produced an error, error code $capture"
+      rm -r "/tmp/$lockname"
+      exit 66
+    else
+      #if no errors rename backup file and move to local storage
+      edebug "tar backup ** "$stamp"_"$sysname"_backup.tar.gz ** completed successfully, moving..."
+      mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
+      capture="$?"
+      if [ "$capture" != "0" ]; then
+        ewarn "moving created backup failed, error code $capture"
+        rm -r "/tmp/$lockname"
+        exit 66
+      else
+        edebug "backup file successfully moved to backupfolder: $backupfolder"
+      fi
+    fi
   else
-    edebug "backup file successfully moved to backupfolder: $backupfolder"
+    edebug "running in dry-mode, no back-up created"
   fi
 fi
 #
@@ -223,12 +225,26 @@ if [[ "$remote_sync" == "1" ]]; then
     cd /$backupfolder/
     #  rclone copy /$backupfolder mediapc-jotta:backup
     #  rclone copy ~/Kodi_Test_Audio/Spring\ -\ Blender\ Open\ Movie.mp4 mediapc-jotta:ubuntu_sys_backups
-    rclone "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination"
-    if [ "$?" != "0" ]; then
+    if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
+      sudo -u $username rclone "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination" > /dev/null 2>&1 &
+      remotesync_pid=$!
+      pid_name=$remotesync_pid
+      edebug "remote sync PID is: $remotesync_pid, recorded as PID_name: $pid_name"
+      progress_bar
       capture="$?"
-      ewarn "remote backup process produced an error, error code $capture"
+      if [ "$capture" != "0" ]; then
+        ewarn "remote backup process produced an error, error code $capture"
+      else
+        edebug "remote backup completed successfully"
+      fi
     else
-      edebug "remote backup completed successfully"
+      sudo -u $username rclone "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination"
+      capture="$?"
+      if [ "$capture" != "0" ]; then
+        ewarn "remote backup process produced an error, error code $capture"
+      else
+        edebug "remote backup completed successfully"
+      fi
     fi
   else
     edebug "dryrun enabled, remote sync section triggered but no files transferred"
@@ -248,4 +264,4 @@ else
   exit 65
 fi
 enotify "$scriptlong completed"
-exit 0 # Exit script after printing help, and all else successful
+exit 0
