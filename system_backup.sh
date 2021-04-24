@@ -26,7 +26,7 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="0.5"
+version="0.6"
 #
 #
 #+---------------------+
@@ -49,26 +49,11 @@ fi
 #+---------------------+
 username=jlivin25 #name of the system user doing the backup
 PATH=/sbin:/bin:/usr/bin:/home/"$username"
-#HOME="/home/$username"
-source /home/jlivin25/bin/standalone_scripts/helper_script.sh
-#log="$HOME"/bin/script_logs/system_backup.sh
+source /home/"$username"/bin/standalone_scripts/helper_script.sh
+source /home/"$username"/.config/ScriptSettings/config.sys
 stamp=$(echo "`date +%d%m%Y`-`date +%H%M`") #create a timestamp for our backup
-sysname="vm_test"
-backupfolder="/home/$username/SysBackups" #where to store the backups
-scriptlong="system_backup.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
-#rclone
-#rclone_path=""
-#rclone_method=""
-#rclone_source=""
-#rclone_remote_name=""
-#rclone_remote_destination=""
-rclone_path="/usr/bin/rclone"
-rclone_method="copy"
-rclone_source="$backupfolder"
-rclone_remote_name="jottacloud"
-rclone_remote_destination="vm_tests"
 #
 #
 #+---------------------------------------+
@@ -163,6 +148,26 @@ shift $((OPTIND -1))
 #+------------------+
 enotify "$scriptlong started"
 edebug "PID is: $script_pid"
+edebug "Source config file"
+if [[ ! -f "$config_file" ]]; then
+  ewarn "config file $config_file does not appear to exist"
+  edebug "attempting to source config file from default location"
+  config_file="$HOME/.config/ScriptSettings/config.sh"
+  if [[ ! -f "$config_file" ]]; then
+    ecrit "config file still not located at $config_file, script exiting"
+    rm -r /tmp/"$lockname"
+    exit 65
+  else
+    edebug "located default config file at $config_file, continuing"
+    source "$config_file"
+  fi
+else
+  # source config file
+  einfo "Config file found, using $config_file"
+  source "$config_file"
+fi
+#
+#
 if [[ $dryrun != "1" ]]; then
   if [[ -d "$backupfolder" ]]; then
     edebug "backup location found, using: $backupfolder"
@@ -230,7 +235,7 @@ if [[ $dryrun != "1" ]]; then
       else
         edebug "backup file successfully moved to backupfolder: $backupfolder"
       fi
-    fi    
+    fi
   fi
 else
   edebug "running in dry-mode, no back-up created"
@@ -247,7 +252,7 @@ if [[ "$remote_sync" == "1" ]]; then
     #  rclone copy /$backupfolder mediapc-jotta:backup
     #  rclone copy ~/Kodi_Test_Audio/Spring\ -\ Blender\ Open\ Movie.mp4 mediapc-jotta:ubuntu_sys_backups
     if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
-      sudo -u $username rclone "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination" > /dev/null 2>&1 &
+      sudo -u $username rclone "$rclone_config" "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination" > /dev/null 2>&1 &
       remotesync_pid=$!
       pid_name=$remotesync_pid
       edebug "remote sync PID is: $remotesync_pid, recorded as PID_name: $pid_name"
