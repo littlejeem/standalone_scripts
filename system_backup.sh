@@ -48,9 +48,8 @@ fi
 #+---"Set Variables"---+
 #+---------------------+
 username=jlivin25 #name of the system user doing the backup
-PATH=/sbin:/bin:/usr/bin:/home/"$username"
 source /home/"$username"/bin/standalone_scripts/helper_script.sh
-source /home/"$username"/.config/ScriptSettings/config.sys
+config_file="/home/"$username"/.config/ScriptSettings/config.sys"
 stamp=$(echo "`date +%d%m%Y`-`date +%H%M`") #create a timestamp for our backup
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
@@ -141,6 +140,14 @@ do
     esac
 done
 shift $((OPTIND -1))
+#
+#
+#+-----------------+
+#+---Adjust PATH---+
+#+-----------------+
+if [[ -z $username ]]; then
+  export PATH="/home/$username/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+fi
 #
 #
 #+------------------+
@@ -252,7 +259,7 @@ if [[ "$remote_sync" == "1" ]]; then
     #  rclone copy /$backupfolder mediapc-jotta:backup
     #  rclone copy ~/Kodi_Test_Audio/Spring\ -\ Blender\ Open\ Movie.mp4 mediapc-jotta:ubuntu_sys_backups
     if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
-      sudo -u $username rclone "$rclone_config" "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination" > /dev/null 2>&1 &
+      sudo -u $username rclone --config="$rclone_config" "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination" > /dev/null 2>&1 &
       remotesync_pid=$!
       pid_name=$remotesync_pid
       edebug "remote sync PID is: $remotesync_pid, recorded as PID_name: $pid_name"
@@ -264,7 +271,7 @@ if [[ "$remote_sync" == "1" ]]; then
         edebug "remote backup completed successfully"
       fi
     else
-      sudo -u $username rclone "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination"
+      sudo -u $username rclone --config="$rclone_config" "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination"
       capture="$?"
       if [ "$capture" != "0" ]; then
         ewarn "remote backup process produced an error, error code $capture"
