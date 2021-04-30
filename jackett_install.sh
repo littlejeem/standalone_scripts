@@ -50,7 +50,7 @@ fi
 #+---"Set Variables"---+
 #+---------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}')
+jackett_ver=$(jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}' | cut -d \/ -f 2)
 jackett_target=$(echo $jackett_ver)
 backup_name=$(echo Jackett_$(date +%d.%m.%y_%H:%M))
 #
