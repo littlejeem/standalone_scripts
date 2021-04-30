@@ -26,7 +26,7 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="0.6"
+version="0.7"
 #
 #
 #+---------------------+
@@ -48,9 +48,8 @@ fi
 #+---"Set Variables"---+
 #+---------------------+
 username=jlivin25 #name of the system user doing the backup
-source /home/"$username"/bin/standalone_scripts/helper_script.sh
-config_file="/home/"$username"/.config/ScriptSettings/config.sys"
 stamp=$(echo "`date +%d%m%Y`-`date +%H%M`") #create a timestamp for our backup
+scriptlong="system_backup.sh"
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
 #
@@ -58,7 +57,25 @@ script_pid=$(echo $$)
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
-check_running
+#check_running
+check_running () {
+  if [[ -d /tmp/"$lockname" ]]; then
+    while [[ -d /tmp/"$lockname" ]]; do
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;33mWARNING --\033[0m previous script still running"; else logger "[$(basename $0)] WARNING -- previous script still running"; fi;
+      sleep 2m; done
+      #  else
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m no previously running script detected"; else logger "[$(basename $0)] DEBUG --- no previously running script detected"; fi;
+  fi
+  if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m Attempting to lock script"; else logger "[$(basename $0)] DEBUG --- Attempting to lock script"; fi;
+  mkdir /tmp/"$lockname"
+  if [[ $? = 0 ]]; then
+    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp dir is set as: /tmp/$lockname"; else logger "[$(basename $0)] DEBUG --- temp dir is set as: /tmp/$lockname"; fi;
+    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp directory set successfully, script locked"; else logger "[$(basename $0)] DEBUG --- temp directory set successfully, script locked"; fi;
+  else
+    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;31mERROR ---\033[0m setting temp directory unsuccessfull, exiting"; else logger "[$(basename $0)] ERROR --- setting temp directory unsuccessfull, exiting"; fi;
+    exit 65
+  fi
+}
 #
 #
 #+-------------------+
@@ -83,35 +100,6 @@ helpFunction () {
    exit 0 # Exit script after printing help, and all else successful
 }
 #
-run_backup () {
-  tar -cpzf backup.tar.gz \
-  --exclude=/backup.tar.gz \
-  --exclude=/"$backupfolder" \
-  --exclude=/proc \
-  --exclude=/tmp \
-  --exclude=/opt/calibre \
-  --exclude=/mnt \
-  --exclude=/dev \
-  --exclude=/sys \
-  --exclude=/run \
-  --exclude=/snap \
-  --exclude=/sys \
-  --exclude=/var \
-  --exclude=/lib \
-  --exclude=/media \
-  --exclude=/var/log \
-  --exclude=/var/cache/apt/archives \
-  --exclude=/usr/src/linux-headers* \
-  --exclude=/home/*/.gvfs \
-  --exclude=/home/*/.cache \
-  --exclude=/home/*/Downloads \
-  --exclude=/home/*/Music \
-  --exclude=/home/*/Videos \
-  --exclude=/home/*/temp \
-  --exclude=/home/*/.kodi/userdata/Thumbnails \
-  --exclude=/home/*/.local/share/Trash /
-}
-#
 #
 #+-----------------------+
 #+---Set up user flags---+
@@ -123,18 +111,22 @@ do
     case "${opt}" in
       b) backupfolder="${OPTARG}"
       enotify "-b specified, target for backup is: $backupfolder";;
+#      u) username="${OPTARG}"
+#      enotify "-u specified, user is: $username";;
       u) username="${OPTARG}"
-      enotify "-u specified, user is: $username";;
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -u specified, user is: $username"; else logger "[$(basename $0)] NOTICE -- -u specified, user is: $username"; fi;;
       d) dryrun="1"
-      enotify "-d specified, running in dry-run mode";;
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -d specified, running in dry-run mode"; else logger "[$(basename $0)] NOTICE -- -d specified, running in dry-run mode"; fi;;
       r) remote_sync="1"
-      enotify "-r specified, calling remote sync at finish";;
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -r specified, calling remote sync at finish"; else logger "[$(basename $0)] NOTICE -- -r specified, calling remote sync at finish"; fi;;
       s) verbosity=$silent_lvl
-      enotify "-s specified: Silent mode";;
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -s specified: Silent mode"; else logger "[$(basename $0)] NOTICE -- -s specified: Silent mode"; fi;;
       V) verbosity=$inf_lvl
-      enotify "-V specified: Verbose mode";;
+      message="-V specified: Verbose mode"
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m $message"; else logger "[$(basename $0)] NOTICE -- $message"; fi;;
       G) verbosity=$dbg_lvl
-      enotify "-G specified: Debug mode";;
+      message="-G specified: Debug mode"
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m $message"; else logger "[$(basename $0)] NOTICE -- $message"; fi;;
       h) helpFunction;;
       ?) helpFunction;;
     esac
@@ -142,20 +134,60 @@ done
 shift $((OPTIND -1))
 #
 #
+#+------------------------+
+#+---Set or Source Files--+
+#+------------------------+
+help_script="/home/$username/bin/standalone_scripts/helper_script.sh"
+source $help_script
+config_file="/home/$username/.config/ScriptSettings/config.sh"
+#
+#
+#+-----------------+
+#+---Source Files--+
+#+-----------------+
+run_backup () {
+  tar -cpzf backup.tar.gz \
+  --exclude=backup.tar.gz \
+  --exclude=$backup_folder \
+  --exclude=$backup_folder/* \
+  --exclude=proc/* \
+  --exclude=tmp/* \
+  --exclude=opt/calibre \
+  --exclude=mnt/* \
+  --exclude=dev/* \
+  --exclude=sys/* \
+  --exclude=run/* \
+  --exclude=snap/* \
+  --exclude=sys/* \
+  --exclude=var/* \
+  --exclude=lib/* \
+  --exclude=var/log \
+  --exclude=var/cache/apt/archives \
+  --exclude=usr/src/linux-headers* \
+  --exclude=home/*/.gvfs \
+  --exclude=home/*/.cache \
+  --exclude=home/*/Downloads \
+  --exclude=home/*/Music \
+  --exclude=home/*/Videos \
+  --exclude=home/*/temp \
+  --exclude=home/*/.kodi/userdata/Thumbnails \
+  --exclude=home/*/.local/share/Trash \
+  . /
+}
+#
 #+-----------------+
 #+---Adjust PATH---+
 #+-----------------+
 if [[ -z $username ]]; then
   export PATH="/home/$username/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  edebug "PATH is: $PATH"
 fi
 #
 #
-#+------------------+
-#+---Start Script---+
-#+------------------+
-enotify "$scriptlong started"
-edebug "PID is: $script_pid"
-edebug "Source config file"
+#+------------------------------+
+#+---Check required variables---+
+#+------------------------------+
+edebug "Checking for config file"
 if [[ ! -f "$config_file" ]]; then
   ewarn "config file $config_file does not appear to exist"
   edebug "attempting to source config file from default location"
@@ -170,9 +202,18 @@ if [[ ! -f "$config_file" ]]; then
   fi
 else
   # source config file
-  einfo "Config file found, using $config_file"
+  edebug "Config file found, using $config_file"
   source "$config_file"
 fi
+#
+#
+#+------------------+
+#+---Start Script---+
+#+------------------+
+enotify "$scriptlong started"
+edebug "PID is: $script_pid"
+edebug "Source config file"
+
 #
 #
 if [[ $dryrun != "1" ]]; then
