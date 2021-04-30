@@ -4,7 +4,7 @@
 # needs to be saved to ~/.bash_aliases
 # so cp ~/bin/myscripts/standalone_scripts/bash_aliases ~/.bash_aliases
 #
-alias sized='du -h --max-depth=1 | sort -hr' #<---Can also be used with sudo for protected folders
+alias sized='sudo du -h --max-depth=1 | sort -hr'
 
 alias la='ls -lsha'
 
