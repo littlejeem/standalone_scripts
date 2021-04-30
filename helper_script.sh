@@ -28,9 +28,9 @@ dbg_lvl=6
 ## esilent prints output even in silent mode
 # terminal versions
 tty -s && esilent () { verb_lvl=$silent_lvl elog "$@"; }
-tty -s && enotify () { verb_lvl=$ntf_lvl elog "${colwht}NOTICE${colrst} - $*"; }
-tty -s && eok ()    { verb_lvl=$ntf_lvl elog "${colrst}SUCCESS${colrst} - $*"; }
-tty -s && ewarn ()  { verb_lvl=$wrn_lvl elog "${colylw}WARNING${colrst} - $*"; }
+tty -s && enotify () { verb_lvl=$ntf_lvl elog "${colwht}NOTICE${colrst} -- $*"; }
+tty -s && eok ()    { verb_lvl=$ntf_lvl elog "${colrst}SUCCESS${colrst} -- $*"; }
+tty -s && ewarn ()  { verb_lvl=$wrn_lvl elog "${colylw}WARNING${colrst} -- $*"; }
 tty -s && einfo ()  { verb_lvl=$inf_lvl elog "${colwht}INFO${colrst} ---- $*"; }
 tty -s && edebug () { verb_lvl=$dbg_lvl elog "${colgrn}DEBUG${colrst} --- $*"; }
 tty -s && eerror () { verb_lvl=$err_lvl elog "${colred}ERROR${colrst} --- $*"; }
@@ -38,9 +38,9 @@ tty -s && ecrit ()  { verb_lvl=$crt_lvl elog "${colpur}FATAL${colrst} --- $*"; }
 tty -s && edumpvar () { for var in "$@" ; do edebug "$var=${!var}" ; done }
 # syslog versions
 tty -s || esilent () { verb_lvl=$silent_lvl slog "["$(basename $0)"]" "$@" ;}
-tty -s || enotify () { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "NOTICE - $*"; }
-tty -s || eok ()    { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "SUCCESS - $*"; }
-tty -s || ewarn ()  { verb_lvl=$wrn_lvl slog "["$(basename $0)"]" "WARNING - $*"; }
+tty -s || enotify () { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "NOTICE -- $*"; }
+tty -s || eok ()    { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "SUCCESS -- $*"; }
+tty -s || ewarn ()  { verb_lvl=$wrn_lvl slog "["$(basename $0)"]" "WARNING -- $*"; }
 tty -s || einfo ()  { verb_lvl=$inf_lvl slog "["$(basename $0)"]" "INFO ---- $*"; }
 tty -s || edebug () { verb_lvl=$dbg_lvl slog "["$(basename $0)"]" "DEBUG --- $*"; }
 tty -s || eerror () { verb_lvl=$err_lvl slog "["$(basename $0)"]" "ERROR --- $*"; }
@@ -66,19 +66,19 @@ slog() {
 #+-------------------------------+
 check_running () {
   if [[ -d /tmp/"$lockname" ]]; then
-    while [[ -d /var/"$lockname" ]]; do
-      ewarn "previous script still running"
+    while [[ -d /tmp/"$lockname" ]]; do
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;33mWARNING --\033[0m previous script still running"; else logger "[$(basename $0)] WARNING -- previous script still running"; fi;
       sleep 2m; done
       #  else
-      edebug "no previously running script detected"
+      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m no previously running script detected"; else logger "[$(basename $0)] DEBUG --- no previously running script detected"; fi;
   fi
-  edebug "Attempting to lock script"
+  if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m Attempting to lock script"; else logger "[$(basename $0)] DEBUG --- Attempting to lock script"; fi;
   mkdir /tmp/"$lockname"
   if [[ $? = 0 ]]; then
-    edebug "temp dir is set as: /tmp/$lockname"
-    edebug "temp directory set successfully, script locked"
+    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp dir is set as: /tmp/$lockname"; else logger "[$(basename $0)] DEBUG --- temp dir is set as: /tmp/$lockname"; fi;
+    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp directory set successfully, script locked"; else logger "[$(basename $0)] DEBUG --- temp directory set successfully, script locked"; fi;
   else
-    eerror "setting temp directory unsuccessfull, exiting"
+    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;31mERROR ---\033[0m setting temp directory unsuccessfull, exiting"; else logger "[$(basename $0)] ERROR --- setting temp directory unsuccessfull, exiting"; fi;
     exit 65
   fi
 }
@@ -217,13 +217,30 @@ Check_Service_SubState () {
 #+---"Progress bar"-----+
 #+----------------------+
 #thanks to here https://stackoverflow.com/questions/12498304/using-bash-to-display-a-progress-indicator
+#913476814 = 872mb on bytes
 progress_bar () {
+  if [[ -z "${files}" ]]; then
+    if [[ "$filezize" -le "734003200" ]]; then
+      sleep="1"
+      edebug "sleep time in progress bar set to: $sleep"
+    elif [[ "$filezize" -le "943718400" ]]; then
+      sleep="3"
+      edebug "sleep time in progress bar set to: $sleep"
+    elif [[ "$filezize" -le "1048576000" ]]; then
+      sleep="5"
+      edebug "sleep time in progress bar set to: $sleep"
+    fi
+  else
+    sleep="1"
+      edebug "sleep time in progress bar set to fallback: $sleep"
+  fi
   echo "THIS MAY TAKE A WHILE, PLEASE BE PATIENT WHILE $scriptlong IS RUNNING..."
   printf "["
   # While process is running...
   while kill -0 $pid_name 2> /dev/null; do
       printf  "▓"
-      sleep 1
+      sleep "$sleep"
+#      sleep 1
   done
   printf "] done!"
   echo ""
