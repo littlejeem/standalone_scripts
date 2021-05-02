@@ -26,13 +26,14 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="0.7"
+version="0.8"
 #
 #
 #+---------------------+
-#+---"Set Variables"---+
+#+---"Set Verbosity"---+
 #+---------------------+
-verbosity=4
+verbosity=3
+#
 #
 #+---------------------------------------------+
 #+---check running as root before continuing---+
@@ -44,38 +45,21 @@ if [[ $EUID -ne 0 ]]; then
 fi
 #
 #
-#+---------------------+
-#+---"Set Variables"---+
-#+---------------------+
+#+--------------------------------------------+
+#+---"Set Variables & Source helper script"---+
+#+--------------------------------------------+
 username=jlivin25 #name of the system user doing the backup
 stamp=$(echo "`date +%d%m%Y`-`date +%H%M`") #create a timestamp for our backup
 scriptlong="system_backup.sh"
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
+source /usr/local/bin/helper_script.sh
 #
 #
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
-#check_running
-check_running () {
-  if [[ -d /tmp/"$lockname" ]]; then
-    while [[ -d /tmp/"$lockname" ]]; do
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;33mWARNING --\033[0m previous script still running"; else logger "[$(basename $0)] WARNING -- previous script still running"; fi;
-      sleep 2m; done
-      #  else
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m no previously running script detected"; else logger "[$(basename $0)] DEBUG --- no previously running script detected"; fi;
-  fi
-  if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m Attempting to lock script"; else logger "[$(basename $0)] DEBUG --- Attempting to lock script"; fi;
-  mkdir /tmp/"$lockname"
-  if [[ $? = 0 ]]; then
-    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp dir is set as: /tmp/$lockname"; else logger "[$(basename $0)] DEBUG --- temp dir is set as: /tmp/$lockname"; fi;
-    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp directory set successfully, script locked"; else logger "[$(basename $0)] DEBUG --- temp directory set successfully, script locked"; fi;
-  else
-    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;31mERROR ---\033[0m setting temp directory unsuccessfull, exiting"; else logger "[$(basename $0)] ERROR --- setting temp directory unsuccessfull, exiting"; fi;
-    exit 65
-  fi
-}
+check_running
 #
 #
 #+-------------------+
@@ -88,8 +72,9 @@ helpFunction () {
    echo -e "\t -u Use this flag to specify backup user, enter as an arguement to this flag"
    echo -e "\t -d Use this flag to specify dry-run mode, no back up will be made"
    echo -e "\t -r Use this flag to specify calling remote sync at end of script"
-   echo -e "\t -s Override set verbosity to specify silent log level"
-   echo -e "\t -V Override set verbosity to specify verbose log level"
+   echo -e "\t -S Override set verbosity to specify silent log level"
+   echo -e "\t -N Override set verbosity to specify notification log level"
+   echo -e "\t -V Override set verbosity to specify verbose (info) log level"
    echo -e "\t -G Override set verbosity to specify Debug log level"
    if [[ -d "/tmp/$lockname" ]]; then
      rm -r "/tmp/$lockname"
@@ -106,27 +91,25 @@ helpFunction () {
 #+-----------------------+
 #get inputs
 OPTIND=1
-while getopts ":b:u:drsVGh:" opt
+while getopts ":b:u:drsNVGh:" opt
 do
     case "${opt}" in
       b) backupfolder="${OPTARG}"
-      enotify "-b specified, target for backup is: $backupfolder";;
-#      u) username="${OPTARG}"
-#      enotify "-u specified, user is: $username";;
+      einfo "-b specified, target for backup is: $backupfolder";;
       u) username="${OPTARG}"
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -u specified, user is: $username"; else logger "[$(basename $0)] NOTICE -- -u specified, user is: $username"; fi;;
+      einfo "-u specified, user is: $username";;
       d) dryrun="1"
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -d specified, running in dry-run mode"; else logger "[$(basename $0)] NOTICE -- -d specified, running in dry-run mode"; fi;;
+      einfo "-d specified, running in dry-run mode";;
       r) remote_sync="1"
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -r specified, calling remote sync at finish"; else logger "[$(basename $0)] NOTICE -- -r specified, calling remote sync at finish"; fi;;
-      s) verbosity=$silent_lvl
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m -s specified: Silent mode"; else logger "[$(basename $0)] NOTICE -- -s specified: Silent mode"; fi;;
+      einfo "-r specified, calling remote sync at finish";;
+      S) verbosity=$silent_lvl
+      einfo "-s specified: SILENT mode logging";;
+      N) verbosity=$ntf_lvl
+      einfo "-s specified: INFO mode logging";;
       V) verbosity=$inf_lvl
-      message="-V specified: Verbose mode"
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m $message"; else logger "[$(basename $0)] NOTICE -- $message"; fi;;
+      einfo "-V specified: VERBOSE (notify) mode logging";;
       G) verbosity=$dbg_lvl
-      message="-G specified: Debug mode"
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[1;37mNOTICE --\033[0m $message"; else logger "[$(basename $0)] NOTICE -- $message"; fi;;
+      einfo "-G specified: DEBUG mode logging";;
       h) helpFunction;;
       ?) helpFunction;;
     esac
@@ -137,14 +120,13 @@ shift $((OPTIND -1))
 #+------------------------+
 #+---Set or Source Files--+
 #+------------------------+
-help_script="/home/$username/bin/standalone_scripts/helper_script.sh"
-source $help_script
+#files or sources requiring username info
 config_file="/home/$username/.config/ScriptSettings/config.sh"
 #
 #
-#+-----------------+
-#+---Source Files--+
-#+-----------------+
+#+-------------------+
+#+---Set out backup--+
+#+-------------------+
 run_backup () {
   tar -cpzf backup.tar.gz \
   --exclude=backup.tar.gz \
@@ -179,9 +161,17 @@ run_backup () {
 #+---Adjust PATH---+
 #+-----------------+
 if [[ -z $username ]]; then
+  edebug "Setting PATH"
   export PATH="/home/$username/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   edebug "PATH is: $PATH"
 fi
+#
+#
+#+------------------+
+#+---Start Script---+
+#+------------------+
+enotify "$scriptlong STARTED"
+edebug "PID is: $script_pid"
 #
 #
 #+------------------------------+
@@ -210,12 +200,6 @@ fi
 #+------------------+
 #+---Start Script---+
 #+------------------+
-enotify "$scriptlong started"
-edebug "PID is: $script_pid"
-edebug "Source config file"
-
-#
-#
 if [[ $dryrun != "1" ]]; then
   if [[ -d "$backupfolder" ]]; then
     edebug "backup location found, using: $backupfolder"
@@ -223,7 +207,8 @@ if [[ $dryrun != "1" ]]; then
     edebug "no backup location found, attempting to create: $backupfolder"
     mkdir -p "$backupfolder"
     if [[ "$?" != 0 ]]; then
-      edebug "error creating backup location: $backupfolder, please check"
+      ecrit "error creating backup location: $backupfolder, please check"
+      rm -r "/tmp/$lockname"
       exit 65
     else
       edebug "successfully created backup folder: $backupfolder"
@@ -234,6 +219,7 @@ if [[ $dryrun != "1" ]]; then
   capture="$?"
   if [ "$capture" != "0" ]; then
     ecrit "moving to root failed, error code $capture"
+    rm -r "/tmp/$lockname"
     exit 65
   else
     edebug "moving to root successful"
@@ -248,7 +234,7 @@ if [[ $dryrun != "1" ]]; then
     progress_bar
     capture="$?"
     if [ "$capture" != "0" ]; then
-      ewarn "tar backup process produced an error, error code $capture"
+      ecrit "tar backup process produced an error, error code $capture"
       rm -r "/tmp/$lockname"
       exit 66
     else
@@ -257,7 +243,7 @@ if [[ $dryrun != "1" ]]; then
       mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
       capture="$?"
       if [ "$capture" != "0" ]; then
-        ewarn "moving created backup failed, error code $capture"
+        ecrit "moving created backup failed, error code $capture"
         rm -r "/tmp/$lockname"
         exit 66
       else
@@ -268,7 +254,7 @@ if [[ $dryrun != "1" ]]; then
     run_backup
     capture="$?"
     if [ "$capture" != "0" ]; then
-      ewarn "tar backup process produced an error, error code $capture"
+      ecrit "tar backup process produced an error, error code $capture"
       rm -r "/tmp/$lockname"
       exit 66
     else
@@ -277,7 +263,7 @@ if [[ $dryrun != "1" ]]; then
       mv backup.tar.gz /$backupfolder/"$stamp"_"$sysname"_backup.tar.gz
       capture="$?"
       if [ "$capture" != "0" ]; then
-        ewarn "moving created backup failed, error code $capture"
+        ecrit "moving created backup failed, error code $capture"
         rm -r "/tmp/$lockname"
         exit 66
       else
@@ -286,7 +272,7 @@ if [[ $dryrun != "1" ]]; then
     fi
   fi
 else
-  edebug "running in dry-mode, no back-up created"
+  einfo "running in dry-mode, no back-up created"
 fi
 #
 #
@@ -296,9 +282,13 @@ fi
 if [[ "$remote_sync" == "1" ]]; then
   edebug "running remote sync of backup"
   if [[ "$dryrun" != "1" ]]; then
-    cd /$backupfolder/
-    #  rclone copy /$backupfolder mediapc-jotta:backup
-    #  rclone copy ~/Kodi_Test_Audio/Spring\ -\ Blender\ Open\ Movie.mp4 mediapc-jotta:ubuntu_sys_backups
+    cd /$backupfolder
+    if [ "$?" != "0" ]; then
+      ecrit "moving to backup folder error"
+      exit 65
+    else
+      edebug "successfully moved to backup folder"
+    fi
     if [ -t 0 ]; then #test for tty connection, 0 = connected, else not
       sudo -u $username rclone --config="$rclone_config" "$rclone_method" "$rclone_source" "$rclone_remote_name":"$rclone_remote_destination" > /dev/null 2>&1 &
       remotesync_pid=$!
@@ -321,7 +311,7 @@ if [[ "$remote_sync" == "1" ]]; then
       fi
     fi
   else
-    edebug "dryrun enabled, remote sync section triggered but no files transferred"
+    einfo "dryrun enabled, remote sync section triggered but no files transferred"
   fi
 else
   edebug "remote backup sync disabled"
@@ -334,8 +324,8 @@ fi
 if [[ -d "/tmp/$lockname" ]]; then
   rm -r "/tmp/$lockname"
 else
-  eerror "error removing lock directory, /tmp/$lockname"
+  ecrit "error removing lock directory, /tmp/$lockname"
   exit 65
 fi
-enotify "$scriptlong completed"
+enotify "$scriptlong FINISHED"
 exit 0
