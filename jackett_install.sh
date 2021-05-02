@@ -28,7 +28,7 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="2.0"
+version="2.1"
 #
 #
 #+---------------------+
@@ -94,72 +94,70 @@ fi
 #+-------------------+
 #+---Source helper---+
 #+-------------------+
-source /home/$install_user/bin/standalone_scripts/helper_script.sh
+source /usr/local/bin/helper_script.sh
 #
 #
 #+-------------------------+
 #+---"Start main script"---+
 #+-------------------------+
+enotify "$scriptlong started"
+exit 0
 if [ -d "/opt/Jackett" ]; then
-  einfo "Jackett install detected, attempting update"
+  edebug "Jackett install detected, attempting update"
   cd /opt
   wget -q https://github.com/Jackett/Jackett/releases/download/$jackett_target/Jackett.Binaries.LinuxAMDx64.tar.gz
-  einfo "Attempting to stop the service"
+  edebug "Attempting to stop the service"
   systemctl stop jackett.service
   if [[ $? -ne 0 ]]; then
     eerror "stopping service failed, exiting..."
-    exit 1
+    exit 66
   else
-    einfo "Stopped service file successfully"
+    edebug "Stopped service file successfully"
   fi
   if [ -f /home/$install_user/.config/Jackett/ServerConfig.json ]; then
-    einfo "Config file found, making backup"
+    edebug "Config file found, making backup"
     cp /home/$install_user/.config/Jackett/ServerConfig.json /home/$install_user/.config/ServerConfig.json
-    einfo "backing up old files"
-    mv Jackett $backup_name
+    edebug "backing up old files"
+    mv Jackett backup: "$backup_name"
   else
     edebug "No config file found, this might be an error"
   fi
-  tar -xvf Jackett*.tar.gz
+  edebug "extracting .tar file"
+  tar -xvf Jackett*.tar.gz > /dev/null
   if [[ $? -ne 0 ]]; then
-    eerror "extracting Jackett failed, exiting"
-    exit 1
+    eerror "extracting .tar failed, exiting"
+    exit 66
   fi
-  einfo "setting install directory permissions"
+  edebug "setting install directory permissions"
   chown $install_user:$install_user /opt/Jackett
   if [[ $? -eq 1 ]]; then
     eerror "chowning /opt/Radarr failed, exiting..."
-    exit 1
+    exit 66
   fi
-  einfo "Starting jackett.service"
+  edebug "Starting jackett.service"
   systemctl start jackett.service
   if [[ $? -ne 0 ]]; then
     eerror "Starting jackett.service failed"
-    exit 1
+    exit 66
   else
-    einfo "starting jackett.service succeded"
+    edebug "starting jackett.service succeded"
   fi
-  einfo "deleting backups"
+  edebug "deleting backups"
   rm /home/$install_user/.config/ServerConfig.json
   rm Jackett*.tar.gz
 else
-  einfo "No Jackett install detected, attempting install"
+  edebug "No Jackett install detected, attempting install"
   cd /opt
-  einfo "downloading version $(echo $jackett_target)"
+  edebug "downloading version $(echo $jackett_target)"
   wget -q https://github.com/Jackett/Jackett/releases/download/$jackett_target/Jackett.Binaries.LinuxAMDx64.tar.gz
-  tar -xvf Jackett*.tar.gz
-#  mv Jackett /opt/
-#  if [[ $? -eq 1 ]]; then
-#    eerror "moving to /opt/ failed, exiting..."
-#    exit 1
-#  fi
-  einfo "setting install directory permissions"
+  tar -xvf Jackett*.tar.gz > /dev/null
+  edebug "setting install directory permissions"
   chown $install_user:$install_user /opt/Jackett
   if [[ $? -eq 1 ]]; then
     eerror "chowning /opt/Radarr failed, exiting..."
-    exit 1
+    exit 66
   fi
-  einfo "creating .service file"
+  edebug "creating .service file"
   if [ -f "/etc/systemd/system/jackett.service" ]; then
 cat > /etc/systemd/system/jackett.service <<EOF
 [Unit]
@@ -182,23 +180,25 @@ WantedBy=multi-user.target
 EOF
   else
     eerror "Jackett.service file located, exiting"
-    exit 1
+    exit 65
   fi
   if [[ $? -eq 1 ]]; then
     eerror "creating .service file failed, exiting..."
-    exit 1
+    exit 65
   else
-    einfo "created .service file"
+    edebug "created .service file"
   fi
-  einfo "starting service"
+  edebug "starting service"
   systemctl daemon-reload
   systemctl start jackett.service
   if [[ $? -ne 0 ]]; then
     eerror "starting service failed, exiting..."
-    exit 1
+    exit 66
   else
-    einfo "Started service file successfully"
+    edebug "Started service file successfully"
   fi
-  einfo "cleaning up install files"
+  edebug "cleaning up install files"
   rm /opt/Jackett.Binaries*.tar.gz
 fi
+enotify "$scriptlong completed"
+exit 0

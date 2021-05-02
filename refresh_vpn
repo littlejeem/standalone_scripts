@@ -47,7 +47,7 @@ fi
 #+---"Set Variables"---+
 #+---------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/pi/.local/bin:/home/pi/bin
-source "$HOME"/bin/standalone_scripts/helper_script.sh
+source /usr/local/bin/helper_script.sh
 backup_name=$(echo -$(date +%d.%m.%y_%H:%M))
 scriptlong="refresh_vpn.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
