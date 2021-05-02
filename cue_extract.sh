@@ -25,9 +25,9 @@
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
-version="0.6"
+version="0.7"
 #set default logging level
-verbosity=4
+verbosity=3
 logdir="/home/pi/bin/script_logs"
 #
 #
@@ -44,7 +44,7 @@ lidarr_folder="/mnt/usbstorage/download/complete/transmission/LidarrMusic"
 #+---Source helper script---+
 #+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-source "$HOME"/bin/standalone_scripts/helper_script.sh
+source /usr/local/bin/helper_script.sh
 #
 #
 #+----------------------+
@@ -177,14 +177,14 @@ fatal_missing_var
 #+-----------------+
 #+---Main Script---+
 #+-----------------+
-esilent "Script Started"
+enotify "Script Started"
 edebug "Version is $version"
 edebug "PID: $script_pid"
 shopt -s nullglob
 edebug "Grabbing contents of lidarr dir $lidarr_folder into array"
 names=("$lidarr_folder"/*)
 check_folders
-esilent "script complete"
+enotify "script complete"
 rm -r /tmp/cue_extract
 if [[ $? -ne 0 ]]; then
   eerror "removing file"
