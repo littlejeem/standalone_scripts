@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 #
 #
+###########################################################################################################
+###                                                 "INFO"                                              ###
+### A collection of useful commands and functions used as reusable code. In my scripts, the script is   ###
+### part of my 'standalone_scripts' repository and should be simlinked to a static folder, the standard ###
+### in my scripts will be /usr/local/bin.                                                               ###
+### e.g: sudo ln -s /home/$USER/bin/standalone_scripts/helper_script.sh /usr/local/bin/helper_script.sh ###
+###########################################################################################################
+#
+#+-------------+
+#+---Version---+
+#+-------------+
+version=0.1
+#
+#
 #+---------------------+
 #+---Logging Colours---+
 #+---------------------+
@@ -27,27 +41,27 @@ dbg_lvl=6
 #
 ## esilent prints output even in silent mode
 # terminal versions
-tty -s && esilent () { verb_lvl=$silent_lvl elog "$@"; }
-tty -s && enotify () { verb_lvl=$ntf_lvl elog "${colwht}NOTICE${colrst} -- $*"; }
-tty -s && eok ()    { verb_lvl=$ntf_lvl elog "${colrst}SUCCESS${colrst} -- $*"; }
-tty -s && ewarn ()  { verb_lvl=$wrn_lvl elog "${colylw}WARNING${colrst} -- $*"; }
-tty -s && einfo ()  { verb_lvl=$inf_lvl elog "${colwht}INFO${colrst} ---- $*"; }
-tty -s && edebug () { verb_lvl=$dbg_lvl elog "${colgrn}DEBUG${colrst} --- $*"; }
-tty -s && eerror () { verb_lvl=$err_lvl elog "${colred}ERROR${colrst} --- $*"; }
-tty -s && ecrit ()  { verb_lvl=$crt_lvl elog "${colpur}FATAL${colrst} --- $*"; }
+tty -s && esilent () { verb_lvl=$silent_lvl tlog "$@"; }
+tty -s && ecrit ()  { verb_lvl=$crt_lvl tlog "${colpur}FATAL${colrst} --- $*"; }
+tty -s && eerror () { verb_lvl=$err_lvl tlog "${colred}ERROR${colrst} --- $*"; }
+tty -s && ewarn ()  { verb_lvl=$wrn_lvl tlog "${colylw}WARNING${colrst} -- $*"; }
+tty -s && enotify () { verb_lvl=$ntf_lvl tlog "${colwht}NOTICE${colrst} -- $*"; }
+tty -s && einfo ()  { verb_lvl=$inf_lvl tlog "${colwht}INFO${colrst} ---- $*"; }
+tty -s && edebug () { verb_lvl=$dbg_lvl tlog "${colgrn}DEBUG${colrst} --- $*"; }
+tty -s && eok ()    { verb_lvl=$ntf_lvl tlog "${colrst}SUCCESS${colrst} -- $*"; }
 tty -s && edumpvar () { for var in "$@" ; do edebug "$var=${!var}" ; done }
 # syslog versions
 tty -s || esilent () { verb_lvl=$silent_lvl slog "["$(basename $0)"]" "$@" ;}
-tty -s || enotify () { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "NOTICE -- $*"; }
-tty -s || eok ()    { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "SUCCESS -- $*"; }
+tty -s || ecrit ()  { verb_lvl=$crt_lvl slog "["$(basename $0)"]" "FATAL --- $*"; }
+tty -s || eerror () { verb_lvl=$err_lvl slog "["$(basename $0)"]" "ERROR --- $*"; }
 tty -s || ewarn ()  { verb_lvl=$wrn_lvl slog "["$(basename $0)"]" "WARNING -- $*"; }
+tty -s || enotify () { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "NOTICE -- $*"; }
 tty -s || einfo ()  { verb_lvl=$inf_lvl slog "["$(basename $0)"]" "INFO ---- $*"; }
 tty -s || edebug () { verb_lvl=$dbg_lvl slog "["$(basename $0)"]" "DEBUG --- $*"; }
-tty -s || eerror () { verb_lvl=$err_lvl slog "["$(basename $0)"]" "ERROR --- $*"; }
-tty -s || ecrit ()  { verb_lvl=$crt_lvl slog "["$(basename $0)"]" "FATAL --- $*"; }
+tty -s || eok ()    { verb_lvl=$ntf_lvl slog "["$(basename $0)"]" "SUCCESS -- $*"; }
 tty -s || edumpvar () { for var in "$@" ; do edebug "$var=${!var}" ; done }
-# Error log function for terminal
-elog() {
+# Terminal log function for terminal
+tlog() {
   if [ $verbosity -ge $verb_lvl ]; then
     datestring=$(date +%b" "%-d" "%T)
     echo -e "$datestring" "$HOSTNAME" "$USER" \[$lockname\] "$@"
@@ -64,21 +78,23 @@ slog() {
 #+-------------------------------+
 #+---"Check if already runnng"---+
 #+-------------------------------+
+# Function for insertion at beginning of scripts to check for existing tmp directory named using 'lockname' at start of script
+# If detects folder it will put the usings script into a holding 'while' loop until already running script exits
+# Using a folder as this is create using atomic timing and helps prevent race conditions
 check_running () {
   if [[ -d /tmp/"$lockname" ]]; then
     while [[ -d /tmp/"$lockname" ]]; do
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;33mWARNING --\033[0m previous script still running"; else logger "[$(basename $0)] WARNING -- previous script still running"; fi;
+      ewarn "previous script still running"
       sleep 2m; done
       #  else
-      if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m no previously running script detected"; else logger "[$(basename $0)] DEBUG --- no previously running script detected"; fi;
+      edebug "no previously running script detected"
   fi
-  if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m Attempting to lock script"; else logger "[$(basename $0)] DEBUG --- Attempting to lock script"; fi;
+  edebug "Attempting to lock script"
   mkdir /tmp/"$lockname"
   if [[ $? = 0 ]]; then
-    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp dir is set as: /tmp/$lockname"; else logger "[$(basename $0)] DEBUG --- temp dir is set as: /tmp/$lockname"; fi;
-    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;32mDEBUG ---\033[0m temp directory set successfully, script locked"; else logger "[$(basename $0)] DEBUG --- temp directory set successfully, script locked"; fi;
+    edebug "temp dir is set as successfully as: /tmp/$lockname"
   else
-    if [ -t 0 ]; then echo -e "$(date +%b" "%-d" "%T) $HOSTNAME $USER [$lockname] \033[0;31mERROR ---\033[0m setting temp directory unsuccessfull, exiting"; else logger "[$(basename $0)] ERROR --- setting temp directory unsuccessfull, exiting"; fi;
+    eerror "setting temp directory unsuccessfull, exiting"
     exit 65
   fi
 }
