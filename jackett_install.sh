@@ -34,7 +34,7 @@ version="2.1"
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
-verbosity=6
+verbosity=3
 #
 #+---------------------------------------------+
 #+---check running as root before continuing---+
