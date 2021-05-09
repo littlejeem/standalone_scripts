@@ -12,7 +12,7 @@
 #+-------------+
 #+---Version---+
 #+-------------+
-version=0.1
+version=0.2
 #
 #
 #+---------------------+
@@ -30,6 +30,8 @@ colrst='\033[0m'    # Text Reset
 #+-----------------------+
 #+---Logging Functions---+
 #+-----------------------+
+# all credit here: http://www.ludovicocaldara.net/dba/bash-tips-4-use-logging-levels/
+#
 ### verbosity levels
 silent_lvl=0
 crt_lvl=1
@@ -73,6 +75,7 @@ slog() {
     logger "$@"
   fi
 }
+#
 #
 #
 #+-------------------------------+
@@ -235,33 +238,25 @@ Check_Service_SubState () {
 #thanks to here https://stackoverflow.com/questions/12498304/using-bash-to-display-a-progress-indicator
 #913476814 = 872mb on bytes
 progress_bar () {
-  if [[ -z "${files}" ]]; then
-    if [[ "$filezize" -le "734003200" ]]; then
-      sleep="1"
-      edebug "sleep time in progress bar set to: $sleep"
-    elif [[ "$filezize" -le "943718400" ]]; then
-      sleep="3"
-      edebug "sleep time in progress bar set to: $sleep"
-    elif [[ "$filezize" -le "1048576000" ]]; then
-      sleep="5"
-      edebug "sleep time in progress bar set to: $sleep"
-    fi
-  else
-    sleep="1"
-      edebug "sleep time in progress bar set to fallback: $sleep"
-  fi
+  sleep=$units_of_sleep
   echo "THIS MAY TAKE A WHILE, PLEASE BE PATIENT WHILE $scriptlong IS RUNNING..."
   printf "["
   # While process is running...
   while kill -0 $pid_name 2> /dev/null; do
       printf  "▓"
-      sleep "$sleep"
+      sleep $sleep
 #      sleep 1
   done
   printf "] done!"
   echo ""
 }
 #
+#
+#
+# previously its own script
+check_IP () {
+  curl ipinfo.io/ip
+}
 #
 #+------------------------+
 #+---"Useful Variables"---+
