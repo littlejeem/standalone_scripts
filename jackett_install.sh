@@ -1,9 +1,5 @@
 #!/bin/bash
 #
-#+-------------------+
-#+---"VERSION 2.0"---+
-#+-------------------+
-#
 # taken from here https://www.htpcguides.com/install-jackett-ubuntu-15-x-for-custom-torrents-in-sonarr/
 #+------------------+
 #+---"Exit Codes"---+
@@ -52,7 +48,14 @@ fi
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
 jackett_ver=$(wget -q https://github.com/Jackett/Jackett/releases/latest -O - | grep -E \/tag\/ | awk -F "[><]" '{print $3}' | cut -d \/ -f 2)
 jackett_target=$(echo $jackett_ver)
+scriptlong="jackett_install.sh"
 backup_name=$(echo Jackett_$(date +%d.%m.%y_%H:%M))
+#
+#
+#+-------------------+
+#+---Source helper---+
+#+-------------------+
+source /usr/local/bin/helper_script.sh
 #
 #
 #+-------------------+
@@ -63,7 +66,10 @@ function helpFunction () {
    echo "Usage: $0 -u ####"
    echo "Usage: $0"
    echo -e "\t Running the script with no flags causes default behaviour"
-   echo -e "\t-u Use this flag to specify a user to install jackett under"
+   echo -e "\t -u Use this flag to specify a user to install jackett under"
+   echo -e "\t -s Override set verbosity to specify silent log level"
+   echo -e "\t -V Override set verbosity to specify verbose log level"
+   echo -e "\t -G Override set verbosity to specify Debug log level"
    exit 1 # Exit script after printing help
 }
 #
@@ -71,10 +77,19 @@ function helpFunction () {
 #+-----------------------+
 #+---Set up user flags---+
 #+-----------------------+
-while getopts u:h flag
+while getopts "u:t:sVGh" flag
 do
-    case "${flag}" in
-        u) user_install=${OPTARG};;
+    case ${flag} in
+        u) user_install=${OPTARG}
+        enotify "-u specified: installation will use $user_install";;
+        t) test_message=${OPTARG}
+        enotify "-t specified: message reads $test_message";;
+        s) verbosity=$silent_lvl
+        enotify "-s specified: Silent mode";;
+        V) verbosity=$inf_lvl
+        enotify "-V specified: Verbose mode";;
+        G) verbosity=$dbg_lvl
+        enotify "-G specified: Debug mode";;
         h) helpFunction;;
         ?) helpFunction;;
     esac
@@ -91,17 +106,10 @@ else
 fi
 #
 #
-#+-------------------+
-#+---Source helper---+
-#+-------------------+
-source /usr/local/bin/helper_script.sh
-#
-#
 #+-------------------------+
 #+---"Start main script"---+
 #+-------------------------+
 enotify "$scriptlong started"
-exit 0
 if [ -d "/opt/Jackett" ]; then
   edebug "Jackett install detected, attempting update"
   cd /opt
