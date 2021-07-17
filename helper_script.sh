@@ -104,31 +104,31 @@ check_running () {
 #+------------------------+
 #+---Pushover Functions---+
 #+------------------------+
-# use in scripts as pushover > /dev/null if you want to surpress output
+# use in scripts as pushover > /dev/null if you want to surpress output, -s tells curl to be silent -S tells curl to still report errors
 pushover ()
 {
-  curl -s --form-string token="$backup_app_token" --form-string user="$user_token" --form-string message="$message_form" https://api.pushover.net/1/messages.json
+  curl -sS --form-string token="$backup_app_token" --form-string user="$user_token" --form-string message="$message_form" https://api.pushover.net/1/messages.json > /dev/null
 }
 #
 #
 #+----------------------+
 #+---"Kodi Functions"---+
 #+----------------------+
-# use in scripts as update_videolibrary > /dev/null if you want to surpress output
+# use in scripts as pushover > /dev/null if you want to surpress output, -s tells curl to be silent -S tells curl to still report errors
 update_videolibrary () {
-  curl -s --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly
+  curl -sS --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly > /dev/null
 }
 #
 update_musiclibrary () {
-  curl -s --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+  curl -sS --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly > /dev/null
 }
 #
 clean_videolibrary () {
-  curl -s --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly
+  curl -sS --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly > /dev/null
 }
 #
 clean_musiclibrary () {
-  curl -s --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+  curl -sS --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly > /dev/null
 }
 #
 #
