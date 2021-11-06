@@ -20,10 +20,14 @@ alias refresh='sudo shutdown -r now'
 
 alias watch_log='tail -f /var/log/syslog'
 
+alias watch_kodilog='tail -f ~/.kodi/temp/kodi.log'
+
 alias print_log='cat /var/log/syslog'
 
-alias edit_log='nano /var/log/syslog'
+alias print_kodilog='cat ~/.kodi/temp/kodi.log'
 
 alias search_log='read name && grep $name /var/log/syslog'
+
+alias search_kodilog='read name && grep $name ~/.kodi/temp/kodi.log'
 
 alias calibre_add='read name && xvfb-run calibredb add /mnt/usbstorage/ebooks/"$name" --with-library http://localhost:8180'
