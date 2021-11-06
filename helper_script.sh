@@ -43,7 +43,7 @@ dbg_lvl=6
 #
 ## esilent prints output even in silent mode
 # terminal versions
-tty -s && esilent () { verb_lvl=$silent_lvl tlog "["$(basename $0)"]" "$@" ; }
+tty -s && esilent () { verb_lvl=$silent_lvl tlog "$@"; }
 tty -s && ecrit ()  { verb_lvl=$crt_lvl tlog "${colpur}FATAL${colrst} --- $*"; }
 tty -s && eerror () { verb_lvl=$err_lvl tlog "${colred}ERROR${colrst} --- $*"; }
 tty -s && ewarn ()  { verb_lvl=$wrn_lvl tlog "${colylw}WARNING${colrst} -- $*"; }
@@ -53,7 +53,7 @@ tty -s && edebug () { verb_lvl=$dbg_lvl tlog "${colgrn}DEBUG${colrst} --- $*"; }
 tty -s && eok ()    { verb_lvl=$ntf_lvl tlog "${colrst}SUCCESS${colrst} -- $*"; }
 tty -s && edumpvar () { for var in "$@" ; do edebug "$var=${!var}" ; done }
 # syslog versions
-tty -s || esilent () { verb_lvl=$silent_lvl slog "["$(basename $0)"]" "$@" ; }
+tty -s || esilent () { verb_lvl=$silent_lvl slog "["$(basename $0)"]" "$@"; }
 tty -s || ecrit ()  { verb_lvl=$crt_lvl slog "["$(basename $0)"]" "FATAL --- $*"; }
 tty -s || eerror () { verb_lvl=$err_lvl slog "["$(basename $0)"]" "ERROR --- $*"; }
 tty -s || ewarn ()  { verb_lvl=$wrn_lvl slog "["$(basename $0)"]" "WARNING -- $*"; }
@@ -106,7 +106,7 @@ check_running () {
 #+------------------------+
 pushover ()
 {
-  curl -sS --form-string token="$backup_app_token" --form-string user="$user_token" --form-string message="$message_form" https://api.pushover.net/1/messages.json > /dev/null
+  curl -sS --form-string token="$backup_app_token" --form-string user="$user_token" --form-string title="$script_title" --form-string message="$message_form" https://api.pushover.net/1/messages.json > /dev/null
 }
 #
 #
