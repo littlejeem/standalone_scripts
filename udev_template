@@ -1,0 +1,11 @@
+# CONSTRUCTION
+#   ran udevadm info --query=all --name=/dev/sda1 /dev/sdX to get this
+#   these pages were really helpful
+#     https://opensource.com/article/18/11/udev
+#     https://linuxconfig.org/tutorial-on-how-to-write-basic-udev-rules-in-linux
+#     https://www.thegeekdiary.com/beginners-guide-to-udev-in-linux/
+# TROUBLESHOOTING
+#   Always try trigger script first before hooking up to main script
+#   look for ENV{DEVTYPE}=="disk" or equiv if script triggers twice
+#   Doublecheck you have == (equal to) not = (assign to) in all but 'systemd wants' ENV sections, example below
+#KERNEL=="sd**", SUBSYSTEM=="block", ACTION=="add", ENV{DEVTYPE}=="partition", ENV{ID_VENDOR}=="SanDisk", ENV{ID_MODEL}=="Ultra", ENV{ID_SERIAL_SHORT}=="4C530001050913121345", ENV{SYSTEMD_WANTS}="Sandisk_auto_transfer.service"
