@@ -48,20 +48,24 @@ lockname=${scriptlong::-3} # reduces the name to remove .sh
 source /usr/local/bin/helper_script.sh
 #
 #
-#+---------------------------------------+
-#+---"check if script already running"---+
-#+---------------------------------------+
-check_running
-#
-#
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
 #set default logging level, failure to set this will cause a 'unary operator expected' error
-#set default logging level,remember at level 3 and lower, only esilent messages show, best to include an override in getopts
+#remember at level 3 and lower, only esilent messages show, best to include an override in getopts
 verbosity=6
-version="0.1" #
+#
+version="0.2" #
 script_pid=$(echo $$)
+stamp=$(echo "`date +%H.%M`-`date +%d_%m_%Y`")
+notify_lock=/tmp/IPChecker_notify
+#pushover_title="NAME HERE" #Uncomment if using pushover
+#
+#
+#+---------------------------------------+
+#+---"check if script already running"---+
+#+---------------------------------------+
+check_running
 #
 #
 #+-------------------+
