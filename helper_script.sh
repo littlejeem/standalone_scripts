@@ -106,7 +106,7 @@ check_running () {
 #+------------------------+
 pushover ()
 {
-  curl -sS --form-string token="$backup_app_token" --form-string user="$user_token" --form-string title="$script_title" --form-string message="$message_form" https://api.pushover.net/1/messages.json > /dev/null
+  curl -sS --form-string token="$backup_app_token" --form-string user="$user_token" --form-string title="$pushover_title" --form-string message="$message_form" https://api.pushover.net/1/messages.json > /dev/null
 }
 #
 #
