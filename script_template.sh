@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+#########################################################################
+###    "PUT INFO ABOUT THE SCRIPT, ITS PURPOSE, HOW IT WORKS"         ###
+###      "WHERE IT SHOULD BE KEPT, DEPENDANCIES, etc...here"          ###
+#########################################################################
+#
 #
 #+--------------------------------------+
 #+---"Exit Codes & Logging Verbosity"---+
