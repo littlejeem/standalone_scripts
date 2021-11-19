@@ -31,3 +31,9 @@ alias search_log='read name && grep $name /var/log/syslog'
 alias search_kodilog='read name && grep $name ~/.kodi/temp/kodi.log'
 
 alias calibre_add='read name && xvfb-run calibredb add /mnt/usbstorage/ebooks/"$name" --with-library http://localhost:8180'
+
+alias wanip='dig @resolver4.opendns.com myip.opendns.com +short'
+
+alias wanip4='dig @resolver4.opendns.com myip.opendns.com +short -4'
+
+alias wanip6='dig @resolver1.ipv6-sandbox.opendns.com AAAA myip.opendns.com +short -6'
