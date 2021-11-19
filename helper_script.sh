@@ -106,7 +106,7 @@ check_running () {
 #+------------------------+
 pushover ()
 {
-  curl -sS --form-string token="$backup_app_token" --form-string user="$user_token" --form-string title="$pushover_title" --form-string message="$message_form" https://api.pushover.net/1/messages.json > /dev/null
+  curl -sS --form-string token="$application_token" --form-string user="$user_token" --form-string title="$pushover_title" --form-string message="$message_form" https://api.pushover.net/1/messages.json > /dev/null
 }
 #
 #
@@ -253,9 +253,18 @@ progress_bar () {
 #
 #
 #
-# previously its own script
-check_IP () {
-  curl ipinfo.io/ip
+# perhaps add this to alias just like SE answer here?
+#https://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-a-shell-script
+wan_ip () {
+  dig @resolver4.opendns.com myip.opendns.com +short
+}
+#
+wan_ip4 () {
+  dig @resolver4.opendns.com myip.opendns.com +short -4
+}
+#
+wan_ip6 () {
+  dig @resolver1.ipv6-sandbox.opendns.com AAAA myip.opendns.com +short -6
 }
 #
 #+------------------------+
