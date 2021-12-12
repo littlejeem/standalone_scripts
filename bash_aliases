@@ -37,3 +37,7 @@ alias wanip='dig @resolver4.opendns.com myip.opendns.com +short'
 alias wanip4='dig @resolver4.opendns.com myip.opendns.com +short -4'
 
 alias wanip6='dig @resolver1.ipv6-sandbox.opendns.com AAAA myip.opendns.com +short -6'
+
+alias kodi_version="grep Kodi .kodi/temp/kodi.log | head -1 | cut -d '(' -f 2 | cut -d ' ' -f 1"
+
+alias motherboard='sudo dmidecode -t baseboard' #ubuntu only
