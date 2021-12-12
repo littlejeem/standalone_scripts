@@ -255,6 +255,10 @@ progress_bar () {
 #
 # perhaps add this to alias just like SE answer here?
 #https://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-a-shell-script
+int_ip () {
+  dig +short `hostname -f`
+}
+
 wan_ip () {
   dig @resolver4.opendns.com myip.opendns.com +short
 }
