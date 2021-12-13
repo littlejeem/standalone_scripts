@@ -15,21 +15,25 @@ fi
 #+---Set Functions---+
 #+-------------------+
 main_install () {
-  if ! getent group "$app_guid" >/dev/null; then
-    groupadd "$app_guid"
-    echo "Group [$app_guid] created"
-  fi
-  if ! getent passwd "$app_uid" >/dev/null; then
-    adduser --system --no-create-home --ingroup "$app_guid" "$app_uid"
-    echo "User [$app_uid] created and added to Group [$app_guid]"
-  else
-    echo "User [$app_uid] already exists"
+  # Create User / Group as needed
+  if ! getent group "$app_guid" &>/dev/null; then
+      groupadd "$app_guid"
+      echo "Group [$app_guid] created"
   fi
 
-  if ! getent group $app_guid | grep -q "\b${app_uid}\b"; then
-    echo "User [$app_uid] did not exist in Group [$app_guid]"
-    usermod -a -G $app_guid $app_uid
-    echo "Added User [$app_uid] to Group [$app_guid]"
+  if ! getent passwd "$app_uid" &>/dev/null; then
+      useradd --system --groups "$app_guid" "$app_uid"
+      echo "User [$app_uid] created and added to Group [$app_guid]"
+  else
+      echo "User [$app_uid] already exists"
+  fi
+
+  if ! getent group "$app_guid" |& grep -qw "${app_uid}" &>/dev/null; then
+      echo "User [$app_uid] did not exist in Group [$app_guid]"
+      usermod -a -G "$app_guid" "$app_uid"
+      echo "Added User [$app_uid] to Group [$app_guid]"
+  else
+      echo "User [$app_uid] already exists in Group [$app_guid]"
   fi
 
   # Stop the App if running
@@ -40,7 +44,7 @@ main_install () {
   # Create Appdata Directory
   # AppData
   mkdir -p $datadir
-  chown -R $app_uid:$app_uid $datadir
+  chown -R $app_uid:$app_guid $datadir
   chmod 775 $datadir
   # Download and install the App
   # prerequisite packages
@@ -78,21 +82,21 @@ main_install () {
   rm -rf /etc/systemd/system/$app.service
   # Create app .service with correct user startup
   echo "Creating service file"
-  cat << EOF | tee /etc/systemd/system/$app.service >/dev/null
-[Unit]
-Description=${app^} Daemon
-After=syslog.target network.target
-[Service]
-User=$app_uid
-Group=$app_guid
-UMask=$app_umask
-Type=simple
-ExecStart=$bindir/$app_bin -nobrowser -data=$datadir
-TimeoutStopSec=20
-KillMode=process
-Restart=always
-[Install]
-WantedBy=multi-user.target
+  cat <<- EOF | tee /etc/systemd/system/$app.service >/dev/null
+  [Unit]
+  Description=${app^} Daemon
+  After=syslog.target network.target
+  [Service]
+  User=$app_uid
+  Group=$app_guid
+  UMask=$app_umask
+  Type=simple
+  ExecStart=$bindir/$app_bin -nobrowser -data=$datadir
+  TimeoutStopSec=20
+  KillMode=process
+  Restart=always
+  [Install]
+  WantedBy=multi-user.target
 EOF
   # Start the App
   echo "Service file created. Attempting to start the app"
