@@ -299,7 +299,6 @@ progress_bar2_init () {
     edebug "deduct standard: $count_standard_deduction, should read 9"
     count_progress_max=$(echo ${#progress_max})
     edebug "count_progress_max is: $count_progress_max , should read 5"
-    unit_of_measure=$(echo ${#unit_of_measure})
     edebug "unit of measure is: $unit_of_measure, should read cycles"
     count_unit_of_measure=$(echo ${#unit_of_measure})
     edebug "count_unit_of_measure is: $count_unit_of_measure , should read 6"
