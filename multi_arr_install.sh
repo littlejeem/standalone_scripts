@@ -58,7 +58,7 @@ lockname=${scriptlong::-3} # reduces the name to remove .sh
 #
 #set default logging level
 verbosity=3
-version=0.1
+version=0.3
 #
 #
 #+--------------------------+
@@ -87,15 +87,9 @@ helpFunction () {
    echo ""
    echo "Usage: $0 $scriptlong"
    echo "Usage: $0 -V selects dry-run with verbose level logging"
-   echo -e "\t-d Use this flag to specify dry run, no files will be converted, useful in conjunction with -V or -G "
    echo -e "\t-S Override set verbosity to specify silent log level"
    echo -e "\t-V Override set verbosity to specify Verbose log level"
    echo -e "\t-G Override set verbosity to specify Debug log level"
-   echo -e "\t-p Specifically choose to install postfix prior to attempting to install abcde as its a requirement"
-   echo -e "\t-u Use this flag to specify a user to install scripts under, eg. user foo is entered -u foo, as i made these scripts for myself the defualt user is my own"
-   echo -e "\t-g Use this flag to specify a usergroup to install scripts under, eg. group bar is entered -g bar, combined with the -u flag these settings will be used as: chown foo:bar. As i made these scripts for myself the defualt group is my own"
-   echo -e "\t-d Use this flag to specify the identity of the CD/DVD/BLURAY drive being used, eg. /dev/sr1 is entered -d sr1, sr0 will be the assumed default "
-   echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
    echo -e "\t-h -H Use this flag for help"
    if [ -d "/tmp/$lockname" ]; then
      edebug "removing lock directory"
@@ -110,22 +104,22 @@ main_install () {
   # Create User / Group as needed
   if ! getent group "$app_guid" &>/dev/null; then
       groupadd "$app_guid"
-      echo "Group [$app_guid] created"
+      edebug "Group [$app_guid] created"
   fi
 
   if ! getent passwd "$app_uid" &>/dev/null; then
       useradd --system --groups "$app_guid" "$app_uid"
-      echo "User [$app_uid] created and added to Group [$app_guid]"
+      edebug "User [$app_uid] created and added to Group [$app_guid]"
   else
-      echo "User [$app_uid] already exists"
+      edebug "User [$app_uid] already exists"
   fi
 
   if ! getent group "$app_guid" |& grep -qw "${app_uid}" &>/dev/null; then
-      echo "User [$app_uid] did not exist in Group [$app_guid]"
+      edebug "User [$app_uid] did not exist in Group [$app_guid]"
       usermod -a -G "$app_guid" "$app_uid"
-      echo "Added User [$app_uid] to Group [$app_guid]"
+      edebug "Added User [$app_uid] to Group [$app_guid]"
   else
-      echo "User [$app_uid] already exists in Group [$app_guid]"
+      edebug "User [$app_uid] already exists in Group [$app_guid]"
   fi
 
   # Stop the App if running
@@ -149,31 +143,31 @@ main_install () {
   "armhf") DLURL="${dlbase}&arch=arm" ;;
   "arm64") DLURL="${dlbase}&arch=arm64" ;;
   *)
-      echo_error "Arch not supported"
-      exit 1
+      eerror "Arch not supported"
+      exit 66
       ;;
   esac
-  echo "Downloading..."
+  edebug "Downloading..."
   wget --content-disposition "$DLURL"
-  tar -xvzf ${app^}.*.tar.gz
-  echo "Installation files downloaded and extracted"
+  tar -xzf ${app^}.*.tar.gz
+  edebug "Installation files downloaded and extracted"
   # remove existing installs
-  echo "Removing existing installation"
+  edebug "Removing existing installation"
   rm -rf $bindir
-  echo "Installing..."
+  edebug "Installing..."
   mv "${app^}" /opt/
   chown $app_uid:$app_uid -R $bindir
   rm -rf "${app^}.*.tar.gz"
   # Ensure we check for an update in case user installs older version or different branch
   touch $datadir/update_required
   chown $app_uid:$app_guid $datadir/update_required
-  echo "App Installed"
+  edebug "App Installed"
   # Configure Autostart
   # Remove any previous app .service
-  echo "Removing old service file"
+  edebug "Removing old service file"
   rm -rf /etc/systemd/system/$app.service
   # Create app .service with correct user startup
-  echo "Creating service file"
+  edebug "Creating service file"
   cat <<- EOF | tee /etc/systemd/system/$app.service >/dev/null
   [Unit]
   Description=${app^} Daemon
@@ -191,16 +185,35 @@ main_install () {
   WantedBy=multi-user.target
 EOF
   # Start the App
-  echo "Service file created. Attempting to start the app"
+  edebug "Service file created. Attempting to start the app"
   systemctl -q daemon-reload
   systemctl enable --now -q "$app"
   # Finish Update/Installation
   host=$(hostname -I)
   ip_local=$(grep -oP '^\S*' <<<"$host")
-  echo ""
-  echo "Install complete"
-  echo "Browse to http://$ip_local:$app_port for the ${app^} GUI"
+  edebug ""
+  edebug "Install complete"
+  edebug "Browse to http://$ip_local:$app_port for the ${app^} GUI"
 }
+#
+#
+#+------------------------+
+#+---"Get User Options"---+
+#+------------------------+
+while getopts ":SVGHhpu:g:d:" opt
+do
+    case "${opt}" in
+        S) verbosity=$silent_lvl
+        edebug "-S specified: Silent mode";;
+        V) verbosity=$inf_lvl
+        edebug "-V specified: Verbose mode";;
+        G) verbosity=$dbg_lvl
+        edebug "-G specified: Debug mode";;
+        H) helpFunction;;
+        h) helpFunction;;
+        ?) helpFunction;;
+    esac
+done
 #
 #
 #+-----------------+
