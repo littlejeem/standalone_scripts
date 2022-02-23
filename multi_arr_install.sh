@@ -134,7 +134,8 @@ main_install () {
   chmod 775 $datadir
   # Download and install the App
   # prerequisite packages
-  apt install -y $app_prereq && apt autoremove -y
+  DEBIAN_FRONTEND=noninteractive apt-get install -qq "$app_prereq" < /dev/null > /dev/null
+  #apt install -y $app_prereq && apt autoremove -y
   ARCH=$(dpkg --print-architecture)
   # get arch
   dlbase="https://$app.servarr.com/v1/update/$branch/updatefile?os=linux&runtime=netcore"
