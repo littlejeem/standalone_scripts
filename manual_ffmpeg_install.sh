@@ -59,12 +59,11 @@ source /usr/local/bin/helper_script.sh
 #+---------------------+
 #set default logging level, failure to set this will cause a 'unary operator expected' error
 #remember at level 3 and lower, only esilent messages show, best to include an override in getopts
-verbosity=6
+verbosity=3
 #
-version="0.2" #
+version="0.3" #
 script_pid=$(echo $$)
 stamp=$(echo "`date +%H.%M`-`date +%d_%m_%Y`")
-notify_lock=/tmp/IPChecker_notify
 #pushover_title="NAME HERE" #Uncomment if using pushover
 #
 #
@@ -85,7 +84,8 @@ helpFunction () {
    echo -e "\t-S Override set verbosity to specify silent log level"
    echo -e "\t-V Override set verbosity to specify Verbose log level"
    echo -e "\t-G Override set verbosity to specify Debug log level"
-   echo -e "\t-h Use this flag for help"
+   echo -e "\t-u specifiy the install user to use"
+   echo -e "\t-h -H Use this flag for help"
    if [ -d "/tmp/$lockname" ]; then
      edebug "removing lock directory"
      rm -r "/tmp/$lockname"
@@ -100,7 +100,7 @@ helpFunction () {
 #+---"Get User Options"---+
 #+------------------------+
 OPTIND=1
-while getopts ":SVGHh:" opt
+while getopts ":SVGHh:u:" opt
 do
     case "${opt}" in
         S) verbosity=$silent_lvl
@@ -109,9 +109,8 @@ do
         edebug "-V specified: Verbose mode";;
         G) verbosity=$dbg_lvl
         edebug "-G specified: Debug mode";;
-#Example for extra options
-#        d) drive_install=${OPTARG}
-#        edebug "-d specified: alternative drive being used";;
+        u) chosen_user=${OPTARG}
+        edebug "-u specified: using $chosen_user";;
         H) helpFunction;;
         h) helpFunction;;
         ?) helpFunction;;
@@ -135,8 +134,8 @@ if [[ $install_user != "" ]]; then
   install_user=$(chosen_user)
   edebug "Install user set as: $install_user"
 else
-  drive_number=$(echo $drive_install)
-  edebug "alternative drive specified, using: $drive_number as drive install"
+  install_user="$USER"
+  edebug "Install user set as: $install_user"
 fi
 #
 edebug "GETOPTS options set"
