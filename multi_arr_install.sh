@@ -148,7 +148,7 @@ main_install () {
       ;;
   esac
   edebug "Downloading..."
-  wget --content-disposition "$DLURL"
+  wget -q --content-disposition "$DLURL"
   tar -xzf ${app^}.*.tar.gz
   edebug "Installation files downloaded and extracted"
   # remove existing installs
@@ -191,7 +191,6 @@ EOF
   # Finish Update/Installation
   host=$(hostname -I)
   ip_local=$(grep -oP '^\S*' <<<"$host")
-  edebug ""
   edebug "Install complete"
   edebug "Browse to http://$ip_local:$app_port for the ${app^} GUI"
 }
@@ -200,7 +199,7 @@ EOF
 #+------------------------+
 #+---"Get User Options"---+
 #+------------------------+
-while getopts ":SVGHhpu:g:d:" opt
+while getopts ":SVGHh" opt
 do
     case "${opt}" in
         S) verbosity=$silent_lvl
