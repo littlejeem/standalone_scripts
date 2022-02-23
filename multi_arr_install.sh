@@ -198,8 +198,8 @@ EOF
   # Finish Update/Installation
   host=$(hostname -I)
   ip_local=$(grep -oP '^\S*' <<<"$host")
-  edebug "Install complete"
-  edebug "Browse to http://$ip_local:$app_port for the ${app^} GUI"
+  edebug "${app^} install complete"
+  enotify "Browse to http://$ip_local:$app_port for the ${app^} GUI"
 }
 #
 #
@@ -233,9 +233,11 @@ done
 #+-----------------+
 #+---Main Script---+
 #+-----------------+
+esilent "$lockname started"
+#
 DEBIAN_FRONTEND=noninteractive apt-get update > /dev/null
-
-if [[ -z $lidarr_override]]; then
+#
+if [[ -z $lidarr_override ]]; then
   edebug "installing lidarr"
   #install lidarr
   app="lidarr"                        # App Name
@@ -251,7 +253,7 @@ if [[ -z $lidarr_override]]; then
   main_install
 fi
 #
-if [[ -z $lidarr_override]]; then
+if [[ -z $lidarr_override ]]; then
   edebug "installing radarr"
   #install radarr
   app="radarr"                        # App Name
@@ -267,7 +269,7 @@ if [[ -z $lidarr_override]]; then
   main_install
 fi
 #
-if [[ -z $lidarr_override]]; then
+if [[ -z $lidarr_override ]]; then
   edebug "installing readarr"
   #install readarr
   app="readarr"                       # App Name
@@ -283,7 +285,7 @@ if [[ -z $lidarr_override]]; then
   main_install
 fi
 #
-if [[ -z $lidarr_override]]; then
+if [[ -z $lidarr_override ]]; then
   edebug "installing prowlarr"
   #install prowlarr
   app="prowlarr"                      # App Name
