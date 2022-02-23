@@ -4,6 +4,8 @@
 # needs to be saved to ~/.bash_aliases
 # so cp ~/bin/myscripts/standalone_scripts/bash_aliases ~/.bash_aliases
 #
+#version="0.2
+#"
 alias sized='sudo du -h --max-depth=1 | sort -hr'
 
 alias la='ls -lsha'
@@ -14,7 +16,7 @@ alias update_kodi='sudo apt update && sudo apt upgrade kodi-x11 -y && sudo apt a
 
 alias os_info='sudo lsb_release -a && Kernel=$(uname -r) && echo "Kernel is: $Kernel" '
 
-alias graphics='lspci | grep VGA'
+alias graphics_info='lspci -k | grep -EA3 'VGA|3D|Display' && nvidia-settings --version'
 
 alias refresh='sudo shutdown -r now'
 
