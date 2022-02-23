@@ -65,7 +65,7 @@ version=0.1
 #+---Source helper script---+
 #+--------------------------+
 # Source helper_script
-if [[ -d /usr/local/bin/helper_script.sh ]]; then
+if [[ -f /usr/local/bin/helper_script.sh ]]; then
   edebug "helper script located, using"
 else
   echo "no helper_script located, exiting. Please install or check location"
