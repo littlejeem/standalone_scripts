@@ -19,28 +19,29 @@ version=0.3
 #+---"LOGGING COLOURS"---+
 #+-----------------------+
 #KEY
-#Black        0;30     Dark Gray     1;30
-#Red          0;31     Light Red     1;31
-#Green        0;32     Light Green   1;32
-#Brown/Orange 0;33     Yellow        1;33
-#Blue         0;34     Light Blue    1;34
-#Purple       0;35     Light Purple  1;35
-#Cyan         0;36     Light Cyan    1;36
-#Light Gray   0;37     White         1;37
+#Black        0;30 = colblk   Dark Gray     1;30
+#Red          0;31 = colred    Light Red     1;31
+#Green        0;32 = colgrn   Light Green   1;32
+#Brown/Orange 0;33 = colbor   Yellow        1;33 = colylw
+#Blue         0;34 = colblu    Light Blue    1;34 = collblu
+#Purple       0;35 = colpur    Light Purple  1;35
+#Cyan         0;36 = colcyn    Light Cyan    1;36
+#Light Gray   0;37 = collgy
+#reset text   0    = colrst
 colwht='\033[1;37m' # White - Regular
 colblk='\033[0;30m' # Black - Regular
+colblu='\034[0;34m' # Blue
 colred='\033[0;31m' # Red
-#red='\033[0;31m'
 colgrn='\033[0;32m' # Green
-#green='\033[0;32m'
 colylw='\033[0;33m' # Yellow
-#yellow='\033[1;33m'
-#brown_orange='\033[0;33m'
-#light_blue='\033[1;34m'
+colbor='\033[0;33m' # Brown/Orange
 colpur='\033[0;35m' # Purple
-#purple='\033[0;35m'
+colcyn='\036[0;36m' # Cyan
 colrst='\033[0m'    # Text Reset
-#nc='\033[0m' # No Color
+# Extra colours
+collblu='\033[1;34m'
+collgy='\037[0;37m'
+coldgy='\130[1;30m'
 #
 #
 #+-------------------------+
@@ -221,8 +222,10 @@ prog_check () {
   if ! command -v "$program_check" &> /dev/null
   then
     ewarn "$program_check could not be found, script won't function wihout it, attempting install"
-    apt update > /dev/null 2>&1
-    apt install "$program_check" -y > /dev/null 2>&1
+    DEBIAN_FRONTEND=noninteractive apt-get update > /dev/null
+#    apt update > /dev/null 2>&1
+    DEBIAN_FRONTEND=noninteractive apt-get install -qq "$program_check" < /dev/null > /dev/null
+#    apt install "$program_check" -y > /dev/null 2>&1
     sleep 3s
     if ! command -v "$program_check" &> /dev/null
     then
@@ -236,6 +239,28 @@ prog_check () {
   fi
 }
 #
+prog_check_deb () {
+  prog_status=$(dpkg -s "$program_check" 2>/dev/null | grep "Status" | cut -d ' ' -f 2)
+  if [[ "$prog_status" = "deinstall" ]] || [[ -z "$prog_status" ]]
+  then
+    ewarn "$program_check could not be found, script won't function wihout it, attempting install"
+    DEBIAN_FRONTEND=noninteractive apt-get update > /dev/null
+#    apt update > /dev/null 2>&1
+    DEBIAN_FRONTEND=noninteractive apt-get install -qq "$program_check" < /dev/null > /dev/null
+#    apt install "$program_check" -y > /dev/null 2>&1
+    sleep 1s
+    prog_status=$(dpkg -s "$program_check" 2>/dev/null | grep "Status" | cut -d ' ' -f 2)
+    if [[ "$prog_status" != "install" ]]
+    then
+      eerror "$program_check install failed, scripts won't function wihout it, exiting"
+      exit 67
+    else
+      edebug "$program_check now installed, continuing"
+    fi
+  elif [[ "$prog_status" = "install" ]]; then
+      edebug "$program_check command located, continuing"
+  fi
+}
 #
 # Must pass in or prepost the function with $service_name
 Check_Service_ActiveState () {
@@ -273,8 +298,9 @@ progress_bar () {
 # for this all credit see answer from 'Vagiz Duseev' at https://stackoverflow.com/questions/238073/how-to-add-a-progress-bar-to-a-shell-script
 # Need to pass in two functions (as cant use a variable as a command in bash), get_max_progress & get_total_progress then call progress_bar2_init
 # immediately after pid'ding your command you want progress from, structure goes:
-# 1: put 2x functions at top of script, examples below
+# 1: put 2x functions at top of script (if using once, by each call for multiple instances), examples below
 # 2: unit_of_measure=""
+# 3: section=""
 # 3: yourcommandhere > /dev/null 2>&1 &
 # 4: yourcommandhere_pid=$!
 # 5: pid_name=$yourcommandhere
