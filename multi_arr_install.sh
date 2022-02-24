@@ -256,7 +256,7 @@ if [[ -z $lidarr_override ]]; then
   main_install
 fi
 #
-if [[ -z $lidarr_override ]]; then
+if [[ -z $radarr_override ]]; then
   edebug "installing radarr"
   #install radarr
   app="radarr"                        # App Name
@@ -272,7 +272,7 @@ if [[ -z $lidarr_override ]]; then
   main_install
 fi
 #
-if [[ -z $lidarr_override ]]; then
+if [[ -z $readarr_override ]]; then
   edebug "installing readarr"
   #install readarr
   app="readarr"                       # App Name
@@ -288,12 +288,14 @@ if [[ -z $lidarr_override ]]; then
   main_install
 fi
 #
-if [[ -z $lidarr_override ]]; then
+if [[ -z $prowlarr_override ]]; then
   edebug "installing prowlarr"
   #install prowlarr
   app="prowlarr"                      # App Name
   app_uid="prowlarr"                  # {Update me if needed} User App will run as and the owner of it's binaries
   app_guid="media"                    # {Update me if needed} Group App will run as.
+  app_port="9696"                     # Default App Port; Modify config.xml after install if needed
+  app_umask="0002"                    # UMask the Service will run as
   bindir="/opt/${app^}"               # Install Location
   branch="develop"                    # {Update me if needed} branch to install
   datadir="/var/lib/prowlarr/"        # {Update me if needed} AppData directory to use
