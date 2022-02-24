@@ -297,6 +297,7 @@ if [[ -z $prowlarr_override ]]; then
   app_port="9696"                     # Default App Port; Modify config.xml after install if needed
   app_prereq="curl sqlite3"           # Required packages
   app_umask="0002"                    # UMask the Service will run as
+  app_bin=${app^}                     # Binary Name of the app
   bindir="/opt/${app^}"               # Install Location
   branch="develop"                    # {Update me if needed} branch to install
   datadir="/var/lib/prowlarr/"        # {Update me if needed} AppData directory to use
