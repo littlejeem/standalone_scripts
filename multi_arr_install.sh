@@ -32,7 +32,7 @@
 #+------------------------------+
 #+---"Set Special Parameters"---+
 #+------------------------------+
-set -euo pipefail
+set -eo pipefail
 #
 #
 #+----------------------+
@@ -60,7 +60,7 @@ lockname=${scriptlong::-3} # reduces the name to remove .sh
 #
 #set default logging level
 verbosity=3
-version=0.3
+version=0.4
 #
 #
 #+--------------------------+
@@ -96,6 +96,7 @@ helpFunction () {
    echo -e "\t-a Override install of radarr"
    echo -e "\t-r Override install of readarr"
    echo -e "\t-p Override install of prowlarr"
+   echo -e "\t-t Override install of transmission"
    echo -e "\t-h -H Use this flag for help"
    if [ -d "/tmp/$lockname" ]; then
      edebug "removing lock directory"
@@ -223,6 +224,8 @@ do
         edebug "-l specified: skipping readarr install";;
         p) prowlarr_override=1
         edebug "-p specified: skipping prowlarr install";;
+        p) trans_override=1
+        edebug "-t specified: skipping transmission install";;
         H) helpFunction;;
         h) helpFunction;;
         ?) helpFunction;;
@@ -291,14 +294,59 @@ if [[ -z $lidarr_override ]]; then
   app="prowlarr"                      # App Name
   app_uid="prowlarr"                  # {Update me if needed} User App will run as and the owner of it's binaries
   app_guid="media"                    # {Update me if needed} Group App will run as.
-  app_port="9696"                     # Default App Port; Modify config.xml after install if needed
-  app_prereq="curl sqlite3"           # Required packages
-  app_umask="0002"                    # UMask the Service will run as
-  app_bin=${app^}                     # Binary Name of the app
   bindir="/opt/${app^}"               # Install Location
   branch="develop"                    # {Update me if needed} branch to install
   datadir="/var/lib/prowlarr/"        # {Update me if needed} AppData directory to use
   main_install
+fi
+#
+if [[ -z $trans_override ]]; then
+  edebug "installing transmission"
+  app="transmission-daemon"           # App Name
+  app_uid="debian-transmission"       # {Update me if needed} User App will run as and the owner of it's binaries
+  app_guid="media"                    # {Update me if needed} Group App will run as.
+  app_prereq="minissdpd natpmpc transmission-cli transmission-common transmission-daemon"           # Required packages
+  app_umask="0002"                    # UMask the Service will run as
+  app_bin=${app^}                     # Binary Name of the app
+  bindir="/opt/${app^}"               # Install Location
+  datadir="/var/lib/prowlarr/"        # {Update me if needed} AppData directory to use
+
+  #Install the app
+  DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:transmissionbt/ppa < /dev/null > /dev/null
+  DEBIAN_FRONTEND=noninteractive apt-get update > /dev/null
+  DEBIAN_FRONTEND=noninteractive apt-get install -qq $app_prereq < /dev/null > /dev/null
+  sleep 2
+  #
+  # Stop the App if running
+  if service --status-all | grep -Fq "$app"; then
+      systemctl stop $app
+      systemctl disable $app.service
+      sleep 2
+  fi
+  #create group
+  if ! getent group "$app_guid" &>/dev/null; then
+      groupadd "$app_guid"
+      edebug "Group [$app_guid] created"
+  fi
+  # add App to group
+  if ! getent group "$app_guid" |& grep -qw "${app_uid}" &>/dev/null; then
+      edebug "User [$app_uid] did not exist in Group [$app_guid]"
+      usermod -a -G "$app_guid" "$app_uid"
+      edebug "Added User [$app_uid] to Group [$app_guid]"
+  else
+      edebug "User [$app_uid] already exists in Group [$app_guid]"
+  fi
+  #
+  # Start the App
+  edebug "Service file created. Attempting to start the app"
+  systemctl -q daemon-reload
+  systemctl enable --now -q "$app"
+  # Finish Update/Installation
+  host=$(hostname -I)
+  ip_local=$(grep -oP '^\S*' <<<"$host")
+  edebug "${app^} install complete"
+  enotify "Browse to http://$ip_local:$app_port for the ${app^} GUI"
+  enotify "Now edit the settings.json file: sudo nano /var/lib/transmission-daemon/.config/transmission-daemon/settings.json"
 fi
 #
 #
