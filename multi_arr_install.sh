@@ -295,6 +295,7 @@ if [[ -z $prowlarr_override ]]; then
   app_uid="prowlarr"                  # {Update me if needed} User App will run as and the owner of it's binaries
   app_guid="media"                    # {Update me if needed} Group App will run as.
   app_port="9696"                     # Default App Port; Modify config.xml after install if needed
+  app_prereq="curl sqlite3"           # Required packages
   app_umask="0002"                    # UMask the Service will run as
   bindir="/opt/${app^}"               # Install Location
   branch="develop"                    # {Update me if needed} branch to install
@@ -307,11 +308,10 @@ if [[ -z $trans_override ]]; then
   app="transmission-daemon"           # App Name
   app_uid="debian-transmission"       # {Update me if needed} User App will run as and the owner of it's binaries
   app_guid="media"                    # {Update me if needed} Group App will run as.
+  app_port="9091"
   app_prereq="minissdpd natpmpc transmission-cli transmission-common transmission-daemon"           # Required packages
-  app_umask="0002"                    # UMask the Service will run as
+  app_umask="2"                    # UMask the Service will run as
   app_bin=${app^}                     # Binary Name of the app
-  bindir="/opt/${app^}"               # Install Location
-  datadir="/var/lib/prowlarr/"        # {Update me if needed} AppData directory to use
 
   #Install the app
   DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:transmissionbt/ppa < /dev/null > /dev/null
