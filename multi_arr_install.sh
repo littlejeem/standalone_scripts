@@ -63,15 +63,23 @@ verbosity=3
 version=0.4
 #
 #
-#+--------------------------+
-#+---Source helper script---+
-#+--------------------------+
+#+------------------------------+
+#+---Source necessary scripts---+
+#+------------------------------+
 # Source helper_script
 if [[ -f /usr/local/bin/helper_script.sh ]]; then
   source /usr/local/bin/helper_script.sh
   edebug "helper script located, using"
 else
   echo "no helper_script located, exiting. Please install or check location"
+  exit 66
+fi
+#
+if [[ -f /usr/local/bin/config.sh ]]; then
+  source /usr/local/bin/helper_script.sh
+  edebug "config file located, using"
+else
+  echo "no config file located, exiting. Please create and populate or check location"
   exit 66
 fi
 #
@@ -97,6 +105,8 @@ helpFunction () {
    echo -e "\t-r Override install of readarr"
    echo -e "\t-p Override install of prowlarr"
    echo -e "\t-t Override install of transmission"
+   echo -e "\t-c Autoconfigure transmission install"
+   echo -e "\t...For automatic configuration you will need to set transmission_download transmission_password transmission_username in /usr/local/bin/config.sh"
    echo -e "\t-h -H Use this flag for help"
    if [ -d "/tmp/$lockname" ]; then
      edebug "removing lock directory"
@@ -196,6 +206,7 @@ EOF
   edebug "Service file created. Attempting to start the app"
   systemctl -q daemon-reload
   systemctl enable --now -q "$app"
+  sleep 2
   # Finish Update/Installation
   host=$(hostname -I)
   ip_local=$(grep -oP '^\S*' <<<"$host")
@@ -224,8 +235,10 @@ do
         edebug "-l specified: skipping readarr install";;
         p) prowlarr_override=1
         edebug "-p specified: skipping prowlarr install";;
-        p) trans_override=1
+        t) trans_override=1
         edebug "-t specified: skipping transmission install";;
+        c) transmission_configure=1
+        edebug "-c specified: configuring transmission automatically";;
         H) helpFunction;;
         h) helpFunction;;
         ?) helpFunction;;
@@ -340,8 +353,96 @@ if [[ -z $trans_override ]]; then
       edebug "User [$app_uid] already exists in Group [$app_guid]"
   fi
   #
-  # Start the App
-  edebug "Service file created. Attempting to start the app"
+
+
+
+
+  # Configure the app
+  if [[ ! -z $transmission_configure ]]; then
+    if [[ -z $transmission_partial ]]; then
+      edebug "setting .partial folder option to false"
+      incomplete_choice="false"
+    else
+      edebug "setting .partial folder option to false"
+      incomplete_choice="true"
+    fi
+    cat <<- EOF | tee /var/lib/transmission-daemon/.config/transmission-daemon/settings.json >/dev/null
+    {
+      "alt-speed-down": 50,
+      "alt-speed-enabled": false,
+      "alt-speed-time-begin": 540,
+      "alt-speed-time-day": 127,
+      "alt-speed-time-enabled": false,
+      "alt-speed-time-end": 1020,
+      "alt-speed-up": 50,
+      "bind-address-ipv4": "0.0.0.0",
+      "bind-address-ipv6": "::",
+      "blocklist-enabled": false,
+      "blocklist-url": "http://www.example.com/blocklist",
+      "cache-size-mb": 4,
+      "dht-enabled": true,
+      "download-dir": "$transmission_download",
+      "download-limit": 100,
+      "download-limit-enabled": 0,
+      "download-queue-enabled": true,
+      "download-queue-size": 5,
+      "encryption": 1,
+      "idle-seeding-limit": 30,
+      "idle-seeding-limit-enabled": false,
+      "incomplete-dir": "$transmission_partial",
+      "incomplete-dir-enabled": $incomplete_choice,
+      "lpd-enabled": false,
+      "max-peers-global": 200,
+      "message-level": 1,
+      "peer-congestion-algorithm": "",
+      "peer-id-ttl-hours": 6,
+      "peer-limit-global": 200,
+      "peer-limit-per-torrent": 50,
+      "peer-port": 51413,
+      "peer-port-random-high": 65535,
+      "peer-port-random-low": 49152,
+      "peer-port-random-on-start": false,
+      "peer-socket-tos": "default",
+      "pex-enabled": true,
+      "port-forwarding-enabled": false,
+      "preallocation": 1,
+      "prefetch-enabled": true,
+      "queue-stalled-enabled": true,
+      "queue-stalled-minutes": 30,
+      "ratio-limit": 2,
+      "ratio-limit-enabled": false,
+      "rename-partial-files": true,
+      "rpc-authentication-required": true,
+      "rpc-bind-address": "0.0.0.0",
+      "rpc-enabled": true,
+      "rpc-host-whitelist": "",
+      "rpc-host-whitelist-enabled": true,
+      "rpc-password": "$transmission_password",
+      "rpc-port": 9091,
+      "rpc-url": "/transmission/",
+      "rpc-username": "$transmission_username",
+      "rpc-whitelist": "127.0.0.*, 192.168.0.*",
+      "rpc-whitelist-enabled": true,
+      "scrape-paused-torrents-enabled": true,
+      "script-torrent-done-enabled": false,
+      "script-torrent-done-filename": "",
+      "seed-queue-enabled": false,
+      "seed-queue-size": 10,
+      "speed-limit-down": 100,
+      "speed-limit-down-enabled": false,
+      "speed-limit-up": 100,
+      "speed-limit-up-enabled": false,
+      "start-added-torrents": true,
+      "trash-original-torrent-files": false,
+      "umask": 18,
+      "upload-limit": 100,
+      "upload-limit-enabled": 0,
+      "upload-slots-per-torrent": 14,
+      "utp-enabled": true
+    }
+EOF
+    edebug "transmission config altered for user"
+  fi
   systemctl -q daemon-reload
   systemctl enable --now -q "$app"
   # Finish Update/Installation
@@ -358,10 +459,10 @@ fi
 #+-------------------+
 rm -r /tmp/"$lockname"
 if [[ $? -ne 0 ]]; then
-    eerror "error removing lockdirectory"
-    exit 65
+  eerror "error removing lockdirectory"
+  exit 65
 else
-    enotify "successfully removed lockdirectory"
+  enotify "successfully removed lockdirectory"
 fi
 esilent "$lockname completed"
 #
