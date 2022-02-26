@@ -218,7 +218,7 @@ EOF
 #+------------------------+
 #+---"Get User Options"---+
 #+------------------------+
-while getopts ":SVGlarpHh" opt
+while getopts ":SVGlarptcHh" opt
 do
     case "${opt}" in
         S) verbosity=$silent_lvl
@@ -230,9 +230,9 @@ do
         l) lidarr_override=1
         edebug "-l specified: skipping lidarr install";;
         a) radarr_override=1
-        edebug "-l specified: skipping radarr install";;
+        edebug "-a specified: skipping radarr install";;
         r) readarr_override=1
-        edebug "-l specified: skipping readarr install";;
+        edebug "-r specified: skipping readarr install";;
         p) prowlarr_override=1
         edebug "-p specified: skipping prowlarr install";;
         t) trans_override=1
@@ -324,7 +324,7 @@ if [[ -z $trans_override ]]; then
   app_guid="media"                    # {Update me if needed} Group App will run as.
   app_port="9091"
   app_prereq="minissdpd natpmpc transmission-cli transmission-common transmission-daemon"           # Required packages
-  app_umask="2"                    # UMask the Service will run as
+  app_umask="0"                    # UMask the Service will run as
   app_bin=${app^}                     # Binary Name of the app
 
   #Install the app
@@ -352,13 +352,9 @@ if [[ -z $trans_override ]]; then
   else
       edebug "User [$app_uid] already exists in Group [$app_guid]"
   fi
-  #
-
-
-
-
   # Configure the app
   if [[ ! -z $transmission_configure ]]; then
+  edebug "automatically configuring transmission options"
     if [[ -z $transmission_partial ]]; then
       edebug "setting .partial folder option to false"
       incomplete_choice="false"
@@ -421,7 +417,7 @@ if [[ -z $trans_override ]]; then
       "rpc-port": 9091,
       "rpc-url": "/transmission/",
       "rpc-username": "$transmission_username",
-      "rpc-whitelist": "127.0.0.*, 192.168.0.*",
+      "rpc-whitelist": "$transmission_rpc_whitelist",
       "rpc-whitelist-enabled": true,
       "scrape-paused-torrents-enabled": true,
       "script-torrent-done-enabled": false,
@@ -434,7 +430,7 @@ if [[ -z $trans_override ]]; then
       "speed-limit-up-enabled": false,
       "start-added-torrents": true,
       "trash-original-torrent-files": false,
-      "umask": 18,
+      "umask": $app_umask,
       "upload-limit": 100,
       "upload-limit-enabled": 0,
       "upload-slots-per-torrent": 14,
@@ -450,7 +446,11 @@ EOF
   ip_local=$(grep -oP '^\S*' <<<"$host")
   edebug "${app^} install complete"
   enotify "Browse to http://$ip_local:$app_port for the ${app^} GUI"
-  enotify "Now edit the settings.json file: sudo nano /var/lib/transmission-daemon/.config/transmission-daemon/settings.json"
+  if [[ -z $transmission_configure ]]; then
+    enotify "Now edit the settings.json file: sudo nano /var/lib/transmission-daemon/.config/transmission-daemon/settings.json"
+  else
+    enotify "Transmission configured automatically as selected"
+  fi
 fi
 #
 #
