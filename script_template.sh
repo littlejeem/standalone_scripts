@@ -151,6 +151,7 @@ source /usr/local/bin/config.sh
 #+---"Display some info about script"---+
 #+--------------------------------------+
 edebug "Version of $scriptlong is: $version"
+edebug "Version of helper_script is: $helper_version"
 edebug "PID is $script_pid"
 #
 #
