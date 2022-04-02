@@ -76,7 +76,7 @@ else
 fi
 #
 if [[ -f /usr/local/bin/config.sh ]]; then
-  source /usr/local/bin/helper_script.sh
+  source /usr/local/bin/config.sh
   edebug "config file located, using"
 else
   echo "no config file located, exiting. Please create and populate or check location"
@@ -245,6 +245,13 @@ do
     esac
 done
 #
+# Check both trans_override and transmission_configure are not set
+if [[ ! -z "$trans_override" && ! -z "$transmission_configure" ]]; then
+  eerror "You can't set both trans_override & transmission_configure as one is part of the other process"
+  helpFunction
+  exit 64
+fi
+#
 #
 #+-----------------+
 #+---Main Script---+
@@ -335,32 +342,45 @@ if [[ -z $trans_override ]]; then
   #
   # Stop the App if running
   if service --status-all | grep -Fq "$app"; then
-      systemctl stop $app
-      systemctl disable $app.service
-      sleep 2
+    systemctl stop $app
+    systemctl disable $app.service
+    sleep 2
   fi
   #create group
   if ! getent group "$app_guid" &>/dev/null; then
-      groupadd "$app_guid"
-      edebug "Group [$app_guid] created"
+    groupadd "$app_guid"
+    edebug "Group [$app_guid] created"
   fi
   # add App to group
   if ! getent group "$app_guid" |& grep -qw "${app_uid}" &>/dev/null; then
-      edebug "User [$app_uid] did not exist in Group [$app_guid]"
-      usermod -a -G "$app_guid" "$app_uid"
-      edebug "Added User [$app_uid] to Group [$app_guid]"
+    edebug "User [$app_uid] did not exist in Group [$app_guid]"
+    usermod -a -G "$app_guid" "$app_uid"
+    edebug "Added User [$app_uid] to Group [$app_guid]"
   else
-      edebug "User [$app_uid] already exists in Group [$app_guid]"
+    edebug "User [$app_uid] already exists in Group [$app_guid]"
   fi
   # Configure the app
   if [[ ! -z $transmission_configure ]]; then
-  edebug "automatically configuring transmission options"
+    edebug "automatically configuring transmission options"
     if [[ -z $transmission_partial ]]; then
       edebug "setting .partial folder option to false"
       incomplete_choice="false"
+      transmission_partial=""
     else
       edebug "setting .partial folder option to false"
       incomplete_choice="true"
+    fi
+    if [[ -f /var/lib/transmission-daemon/.config/transmission-daemon/settings.json ]]; then
+      edebug "/var/lib/transmission-daemon/.config/transmission-daemon/settings.json exists, moving to settings.json.backup"
+      mv /var/lib/transmission-daemon/.config/transmission-daemon/settings.json /var/lib/transmission-daemon/.config/transmission-daemon/settings.json.backup
+    else
+      eerror "No existing settings.json found"
+      exit 65
+    fi
+    if [[ -z $transmission_download ]] || [[ -z $transmission_username ]] || [[ -z $transmission_password ]] || [[ -z $transmission_rpc_whitelist ]]; then
+      eerror "A necessary variable for transmission settings.json is unset, please set and try again"
+      edebug "transmission_download: $transmission_download, transmission_username: $transmission_username, transmission_password: $transmission_password, transmission_rpc_whitelist: $transmission_rpc_whitelist"
+      exit 65
     fi
     cat <<- EOF | tee /var/lib/transmission-daemon/.config/transmission-daemon/settings.json >/dev/null
     {
@@ -440,7 +460,9 @@ EOF
     edebug "transmission config altered for user"
   fi
   systemctl -q daemon-reload
+  sleep 1
   systemctl enable --now -q "$app"
+  sleep 1
   # Finish Update/Installation
   host=$(hostname -I)
   ip_local=$(grep -oP '^\S*' <<<"$host")
