@@ -1,31 +1,89 @@
 #!/usr/bin/env bash
-#
+
+# (C) 2022 littlejeem
+# https://github.com/littlejeem
+
+# This code is licensed under MIT license:
+# http://opensource.org/licenses/MIT
+
+# Shell Style Guide have been adhered to where viable
+# https://google.github.io/styleguide/shell.xml
+# and
+# https://tldp.org/LDP/abs/html/index.html
+
+# Linted with shellcheck: https://github.com/koalaman/shellcheck
+
+# Developed using Atom: https://atom.io/
+
+# References:
+# HERE IF APLICABLE
+
+# Credits
+# Thank you to anyone who has made script, posted on stackexchange or posted a blog thats influenced me,
+# if i've used something and not credited message me and I'll add it. ta!
+
+# DISCLAIMER
+# Whilst care has been taken to thoroughly test this script, my knowledge is currently limited to Ubuntu
+# cases, # as with all Linux/UNIX-like affairs, it may still fail in mysterious
+# circumstances. I'M STILL A NEWB!
+
 #########################################################################
 ###    "PUT INFO ABOUT THE SCRIPT, ITS PURPOSE, HOW IT WORKS"         ###
 ###      "WHERE IT SHOULD BE KEPT, DEPENDANCIES, etc...here"          ###
 #########################################################################
-#
-#
+
 #+--------------------------------------+
 #+---"Exit Codes & Logging Verbosity"---+
 #+--------------------------------------+
+# Exit codes:
 # pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
 # exit 0 = Success
 # exit 64 = Variable Error
 # exit 65 = Sourcing file/folder error
 # exit 66 = Processing Error
 # exit 67 = Required Program Missing
-#
-#verbosity levels
-#silent_lvl=0
-#crt_lvl=1
-#err_lvl=2
-#wrn_lvl=3
-#ntf_lvl=4
-#inf_lvl=5
-#dbg_lvl=6
-#
-#
+
+# Verbosity levels
+# silent_lvl=0
+# crt_lvl=1
+# err_lvl=2
+# wrn_lvl=3
+# ntf_lvl=4
+# inf_lvl=5
+# dbg_lvl=6
+
+
+#+----------------------+
+#+---"Notes on style"---+
+#+----------------------+
+# Use one return to seperate chunks of code from each other
+# Use two returns to seperate sections in the script
+# Use #+------+ to header sections
+# Use ########
+#     ###  ###
+#     ######## to indicate important fill-in sections
+
+# Two spaces to indent, NOT TABS!
+
+# Todo example
+# TODO(littlejeem): Handle the unlikely edge cases (bug ####)
+
+# Google style guide states that a function uses the format 'function name () {' style to declare a function
+# but commonly accepted practice is that function is no longer used and depricated so plain 'name () {'
+# Use comments to describe inobvious functions, example below
+
+#######################################
+# Cleanup files from the backup directory.
+# Globals:
+#   BACKUP_DIR
+#   ORACLE_SID
+# Arguments:
+#   None
+#######################################
+
+# the help function in this file needs no comments as its usage is straight forward
+
+
 #+----------------------+
 #+---"Check for Root"---+
 #+----------------------+
@@ -62,6 +120,7 @@ verbosity=6
 #
 version="0.2" #
 script_pid=$(echo $$)
+#TODO(littlejeem): Look here at usage of backtics
 stamp=$(echo "`date +%H.%M`-`date +%d_%m_%Y`")
 notify_lock=/tmp/IPChecker_notify
 #pushover_title="NAME HERE" #Uncomment if using pushover
@@ -71,8 +130,8 @@ notify_lock=/tmp/IPChecker_notify
 #+---"check if script already running"---+
 #+---------------------------------------+
 check_running
-#
-#
+
+
 #+-------------------+
 #+---Set functions---+
 #+-------------------+
@@ -93,8 +152,8 @@ helpFunction () {
    fi
    exit 65 # Exit script after printing help
 }
-#
-#
+
+
 #+------------------------+
 #+---"Get User Options"---+
 #+------------------------+
@@ -117,15 +176,15 @@ do
     esac
 done
 shift $((OPTIND -1))
-#
-#
+
+
 #+----------------------+
 #+---"Script Started"---+
 #+----------------------+
 # At this point the script is set up and all necessary conditions met so lets log this
 esilent "$lockname started"
-#
-#
+
+
 #+-------------------------------+
 #+---Configure GETOPTS options---+
 #+-------------------------------+
@@ -137,24 +196,24 @@ else
   drive_number=$(echo $drive_install)
   edebug "alternative drive specified, using: $drive_number as drive install"
 fi
-#
+
 edebug "GETOPTS options set"
-#
-#
+
+
 #+--------------------------+
 #+---"Source config file"---+
 #+--------------------------+
 source /usr/local/bin/config.sh
-#
-#
+
+
 #+--------------------------------------+
 #+---"Display some info about script"---+
 #+--------------------------------------+
 edebug "Version of $scriptlong is: $version"
 edebug "Version of helper_script is: $helper_version"
 edebug "PID is $script_pid"
-#
-#
+
+
 #+-------------------+
 #+---Set up script---+
 #+-------------------+
@@ -162,18 +221,16 @@ edebug "PID is $script_pid"
 edebug "INVOCATION_ID is set as: $INVOCATION_ID"
 edebug "EUID is set as: $EUID"
 edebug "PATH is: $PATH"
-#
-#
+
+
 #+----------------------------+
 #+---"Main Script Contents"---+
 #+----------------------------+
-#
-#
 ###################################
 ### INSERT SCRIPT CONTENTS HERE ###
 ###################################
-#
-#
+
+
 #+-------------------+
 #+---"Script Exit"---+
 #+-------------------+
