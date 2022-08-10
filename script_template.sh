@@ -65,6 +65,9 @@
 
 # Two spaces to indent, NOT TABS!
 
+# don't echo "" or echo -e "" for a blank line, use echo -e "\r" or echo -e "\n"
+# edebug "\r" or equivalent will also work
+
 # Todo example
 # TODO(littlejeem): Handle the unlikely edge cases (bug ####)
 
@@ -101,7 +104,7 @@
 # imports the name of this script
 # failure to to set this as lockname will result in check_running failing and 'hung' script
 # manually set this if being run as child from another script otherwise will inherit name of calling/parent script
-scriptlong=`basename "$0"`
+scriptlong=$(basename "$0")
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 #
 #
@@ -124,12 +127,6 @@ script_pid=$(echo $$)
 stamp=$(echo "`date +%H.%M`-`date +%d_%m_%Y`")
 notify_lock=/tmp/IPChecker_notify
 #pushover_title="NAME HERE" #Uncomment if using pushover
-#
-#
-#+---------------------------------------+
-#+---"check if script already running"---+
-#+---------------------------------------+
-check_running
 
 
 #+-------------------+
@@ -153,6 +150,23 @@ helpFunction () {
    exit 65 # Exit script after printing help
 }
 
+clean_ctrlc () {
+  let ctrlc_count++
+  if [[ $ctrlc_count == 1 ]]; then
+    echo "Quit command detected, are you sure?"
+  elif [[ $ctrlc_count == 2 ]]; then
+    echo "...once more and the script will exit..."
+  else
+    echo "...exiting script."
+    if [ -d "/tmp/$lockname" ]; then
+      edebug "removing lock directory"
+      rm -r "/tmp/$lockname"
+    else
+      edebug "problem removing lock directory"
+    fi
+  fi
+  exit 66
+}
 
 #+------------------------+
 #+---"Get User Options"---+
@@ -178,6 +192,21 @@ done
 shift $((OPTIND -1))
 
 
+#+---------------------+
+#+---"Trap & ctrl-c"---+
+#+---------------------+
+#SIGINT, SIGTERM, or SIGHUP
+trap clean_ctrlc SIGINT
+trap clean_exit SIGTERM
+ctrlc_count=0
+
+
+#+---------------------------------------+
+#+---"check if script already running"---+
+#+---------------------------------------+
+check_running
+
+
 #+----------------------+
 #+---"Script Started"---+
 #+----------------------+
@@ -189,7 +218,7 @@ esilent "$lockname started"
 #+---Configure GETOPTS options---+
 #+-------------------------------+
 #e.g for a drive option
-if [[ $drive_install = "" ]]; then
+if [[ -z $drive_install ]]; then
   drive_number="sr0"
   edebug "no alternative drive specified, using default: $drive_number as drive install"
 else
