@@ -168,6 +168,17 @@ clean_ctrlc () {
   exit 66
 }
 
+clean_exit () {
+  if [ -d "/tmp/$lockname" ]; then
+    edebug "removing lock directory"
+    rm -r "/tmp/$lockname"
+  else
+    edebug "problem removing lock directory"
+  fi
+  esilent "$lockname completed"
+  exit 0
+}
+
 #+------------------------+
 #+---"Get User Options"---+
 #+------------------------+
