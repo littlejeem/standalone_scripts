@@ -34,6 +34,8 @@ alias search_kodilog='read name && grep $name ~/.kodi/temp/kodi.log'
 
 alias calibre_add='read name && xvfb-run calibredb add /mnt/usbstorage/ebooks/"$name" --with-library http://localhost:8180'
 
+alias ipinfo='wget -qO- https://ipinfo.io'
+
 alias wanip='dig @resolver4.opendns.com myip.opendns.com +short'
 
 alias wanip4='dig @resolver4.opendns.com myip.opendns.com +short -4'
@@ -42,4 +44,6 @@ alias wanip6='dig @resolver1.ipv6-sandbox.opendns.com AAAA myip.opendns.com +sho
 
 alias kodi_version="grep Kodi .kodi/temp/kodi.log | head -1 | cut -d '(' -f 2 | cut -d ' ' -f 1"
 
-alias motherboard='sudo dmidecode -t baseboard' #ubuntu only
+alias motherboard_info='sudo dmidecode -t baseboard' #ubuntu only
+
+alias memory_info='grep MemTotal /proc/meminfo'
