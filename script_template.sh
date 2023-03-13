@@ -105,7 +105,12 @@
 # failure to to set this as lockname will result in check_running failing and 'hung' script
 # manually set this if being run as child from another script otherwise will inherit name of calling/parent script
 scriptlong=$(basename "$0")
-lockname=${scriptlong::-3} # reduces the name to remove .sh
+#test to see if ends in .sh, if so remove
+if [[ "${scriptlong#"${scriptlong%???}"}" == ".sh" ]]; then
+  lockname=${scriptlong::-3}
+else
+  lockname="$scriptlong"
+fi
 #
 #
 #+--------------------------+
@@ -119,7 +124,7 @@ source /usr/local/bin/helper_script.sh
 #+---------------------+
 #set default logging level, failure to set this will cause a 'unary operator expected' error
 #remember at level 3 and lower, only esilent messages show, best to include an override in getopts
-verbosity=6
+verbosity=3
 #
 version="0.2" #
 script_pid=$(echo $$)
@@ -222,7 +227,7 @@ check_running
 #+---"Script Started"---+
 #+----------------------+
 # At this point the script is set up and all necessary conditions met so lets log this
-esilent "$lockname started"
+esilent "$scriptlong started"
 
 
 #+-------------------------------+
@@ -269,6 +274,16 @@ edebug "PATH is: $PATH"
 ###################################
 ### INSERT SCRIPT CONTENTS HERE ###
 ###################################
+
+
+#+----------------+
+#+---"Pushover"---+
+#+----------------+
+#Call pushover
+pushover_title="My great script name, pushover message header"
+#define $application_token and $user_token in config file (/usr/local/bin/config.sh)
+$message_form="Your main script message, usually errors not successes"
+pushover
 
 
 #+-------------------+
