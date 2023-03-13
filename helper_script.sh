@@ -49,6 +49,12 @@ coldgy='\130[1;30m'
 #+-------------------------+
 # all credit here: http://www.ludovicocaldara.net/dba/bash-tips-4-use-logging-levels/
 #
+#verbosity level flags in help functions should be:
+#-D = DEBUG
+#-I = INFO
+#-Q = QUIET
+
+
 ### verbosity levels
 silent_lvl=0
 crt_lvl=1
@@ -57,6 +63,15 @@ wrn_lvl=3
 ntf_lvl=4
 inf_lvl=5
 dbg_lvl=6
+#TODO:(@littlejeem): propose new verobisty names based on how they are used by me
+#silent_lvl=0 #script started, script stopped
+#crt_lvl=1
+#err_lvl=2
+#wrn_lvl=3
+#nfy_lvl=4 #normal / default log level. Useful info eg. progress
+#dbg_lvl=5 #enhaced logging, eg. shows variable values
+#tra_lvl=6 #shows full details inc contents of arrays etc, very long to help trace errors
+
 #
 ## esilent prints output even in silent mode
 # terminal versions
@@ -198,25 +213,33 @@ check_running () {
     exit 65
   fi
 }
-#
-fatal_missing_var () {
- if [[ -z "${JAIL_FATAL}" ]]; then
-  eerror "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
-  rm -r /tmp/"$lockname"
-  exit 64
- else
-  einfo "variable found, using: $JAIL_FATAL"
- fi
+
+#pass in $variable_name
+check_variable_set () {
+  if [ -z $variable_name ]; then
+    ecrit "\$variable_name shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$variable_name shows set, using"
+  fi
 }
-#
-debug_missing_var () {
- if [[ -z "${JAIL_DEBUG}" ]]; then
-  edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
- else
-  einfo "variable found, using: $JAIL_DEBUG"
- fi
+
+#pass in $variable_name & $directory_name
+check_variable_folder_set () {
+  if [ -z $variable_name ]; then
+    ecrit "\$variable_name shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$directory_name set, checking folder exists"
+    if [ -d $directory_name ]; then
+      edebug "$directory_name folder found"
+    else
+      ecrit "\$directory_name doesn't exist"
+      clean_exit
+    fi
+  fi
 }
-#
+
 #you must pass the completed variable program_check to this function, eg program_check=unzip
 prog_check () {
   if ! command -v "$program_check" &> /dev/null
@@ -350,7 +373,9 @@ progress_bar2_init () {
     progress_bar2 $progress_total $progress_max $unit_of_measure
 
     # Check if we reached 100%
-    if [ $progress_total == $progress_max ]; then break; fi
+    if [ $progress_total == $progress_max ]; then
+      break
+    fi
     sleep 1  # Wait before redrawing
   done
 # Go to the newline at the end of task
