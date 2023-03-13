@@ -96,9 +96,9 @@ set_exclusions () {
     jotta-cli ignores add --pattern *.db-wal --backup $arr
     jotta-cli ignores add --pattern *.xml --backup $arr
     jotta-cli ignores add --pattern *.pid --backup $arr
+    jotta-cli ignores add --pattern update_required --backup $arr
     arr=
   fi
-
 }
 #+------------------+
 #+---Main Script----+
