@@ -16,7 +16,7 @@ alias update_kodi='sudo apt update && sudo apt upgrade kodi-x11 -y && sudo apt a
 
 alias os_info='sudo lsb_release -a && Kernel=$(uname -r) && echo "Kernel is: $Kernel" '
 
-alias graphics_info='lspci -k | grep -EA3 'VGA|3D|Display' && nvidia-settings --version'
+alias graphics_info='lspci -k | grep -EA3 "VGA|3D|Display" && nvidia-settings --version'
 
 alias refresh='sudo shutdown -r now'
 
@@ -46,4 +46,6 @@ alias kodi_version="grep Kodi .kodi/temp/kodi.log | head -1 | cut -d '(' -f 2 | 
 
 alias motherboard_info='sudo dmidecode -t baseboard' #ubuntu only
 
-alias memory_info='grep MemTotal /proc/meminfo'
+alias memory_info='grep MemTotal /proc/meminfo && sudo dmidecode --type 17'
+
+alias cpu_information='lscpu'
