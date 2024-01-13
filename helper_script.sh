@@ -230,23 +230,36 @@ check_fatal_missing_var () {
   fi
 }
 
+check_debug_missing_var () {
+  argument_var_value="$1"
+  edebug "Checking variable $1"
+  if [[ -z "${!argument_var_value}" ]]; then
+    ewarn "Failed to find $1, $1 is unset or set to the empty string, this may cause unexpected issues!"
+  else
+    einfo "variable exists and is not zero/empty, using variable: $1, with value ${!1}"
+  fi
+}
+
+
 #DEPRECATED
 fatal_missing_var () {
- if [[ -z "${JAIL_FATAL}" ]]; then
-  eerror "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
-  rm -r /tmp/"$lockname"
-  exit 64
- else
-  einfo "variable found, using: $JAIL_FATAL"
- fi
+  esilent "NOTE: This function (fatal_missing_var) is deprecated, please use 'check_fatal_missing_var' instead"
+  if [[ -z "${JAIL_FATAL}" ]]; then
+    eerror "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+    rm -r /tmp/"$lockname"
+    exit 64
+  else
+    einfo "variable found, using: $JAIL_FATAL"
+  fi
 }
 
 debug_missing_var () {
- if [[ -z "${JAIL_DEBUG}" ]]; then
-  edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
- else
-  einfo "variable found, using: $JAIL_DEBUG"
- fi
+  esilent "NOTE: This function (debug_missing_var) is deprecated, please use 'check_debug_missing_var' instead"
+  if [[ -z "${JAIL_DEBUG}" ]]; then
+    edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
+  else
+    einfo "variable found, using: $JAIL_DEBUG"
+  fi
 }
 
 
