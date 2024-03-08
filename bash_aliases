@@ -3,9 +3,10 @@
 #+--------------+
 # needs to be saved to ~/.bash_aliases
 # so cp ~/bin/myscripts/standalone_scripts/bash_aliases ~/.bash_aliases
+# OR
+# ln -s /home/jlivin25/bin/standalone_scripts/bash_aliases /home/jlivin25/.bash_aliases
 #
-#version="0.2
-#"
+#version="0.3"
 alias sized='sudo du -h --max-depth=1 | sort -hr'
 
 alias la='ls -lsha'
@@ -63,5 +64,3 @@ alias docker_clean1='docker image prune'
 alias docker_clean2='docker system prune'
 
 alias docker_clean3='docker volume prune'
-
-alias edit_backup='nano /etc/star_backup_settings.conf'
