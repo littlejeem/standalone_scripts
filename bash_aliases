@@ -48,4 +48,20 @@ alias motherboard_info='sudo dmidecode -t baseboard' #ubuntu only
 
 alias memory_info='grep MemTotal /proc/meminfo && sudo dmidecode --type 17'
 
-alias cpu_information='lscpu'
+alias cpu_memory='lscpu'
+
+alias edit_backup='nano /etc/star_backup_settings.conf'
+
+alias docker_down='docker compose -f ~/docker/docker-compose.yml down'
+
+alias docker_pull='docker compose -f ~/docker/docker-compose.yml pull'
+
+alias docker_up='docker compose -f ~/docker/docker-compose.yml up -d'
+
+alias docker_clean1='docker image prune'
+
+alias docker_clean2='docker system prune'
+
+alias docker_clean3='docker volume prune'
+
+alias edit_backup='nano /etc/star_backup_settings.conf'
