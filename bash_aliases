@@ -67,5 +67,5 @@ alias docker_clean3='docker volume prune'
 
 ##FUNCTIONS
 docker_interact() {
-  docker compose -f /home/emlyn/docker/docker-compose.yml exec $1 bash
+  docker compose -f /home/$USER/docker/docker-compose.yml exec $1 bash
 }
