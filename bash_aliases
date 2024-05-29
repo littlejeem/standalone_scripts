@@ -64,3 +64,8 @@ alias docker_clean1='docker image prune'
 alias docker_clean2='docker system prune'
 
 alias docker_clean3='docker volume prune'
+
+##FUNCTIONS
+docker_interact() {
+  docker compose -f /home/emlyn/docker/docker-compose.yml exec $1 bash
+}
