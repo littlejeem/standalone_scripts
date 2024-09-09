@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# Paste this file into /usr/local/bin/autofan
+# crontab -e
+# paste "@reboot /bin/bash /usr/local/bin/autofan >> /usr/local/bin/cron.log"
+# chmod +x /usr/local/bin/autofan.sh
+
+# This file is copied from the ilo4_unlock (https://github.com/kendallgoto/ilo4_unlock/).
+# Copyright (c) 2022 Kendall Goto.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+# NOTE: this is just what I use on my system! I DON'T suggest these fan curves
+# since they are aggressive and unsafe. I play loose since I am also lazy. Here's some setup notes:
+# I write iLO directly to this system, running in a CentOS ESXI VM on my server
+# I have this script loaded at boot with crontab @reboot
+# This setup is tuned for my DL380p Gen8 SFF server to mainly cope with a malfunctioning HD controller temp sensor and reduce the jumbo sounds
+
+echo "-------------------------------------------------------------------" >> /usr/local/bin/cron.log
+echo /usr/bin/date >> /usr/local/bin/cron.log
+
+user=root
+IP=192.168.0.13
+
+ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 37 off"
+ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 35 off"
+ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 60 off"
+ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 56 off"
+ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 57 off"
+ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 61 off"
+ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 47 off"
+
+# Enable new lowest fan speeds
+count=0
+fans=52
+fan_speed=1900
+while [[ $count -lt $fans ]]
+do
+  ((count++))
+  ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa "${user}"@"${IP}" "fan pid ${count} lo ${fan_speed}"
+done
