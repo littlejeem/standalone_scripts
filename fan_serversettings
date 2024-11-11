@@ -25,12 +25,16 @@
 # since they are aggressive and unsafe. I play loose since I am also lazy. Here's some setup notes:
 # I write iLO directly to this system, running in a CentOS ESXI VM on my server
 # I have this script loaded at boot with crontab @reboot
-# This setup is tuned for my DL380p Gen8 SFF server to mainly cope with a malfunctioning HD controller temp sensor and reduce the jumbo sounds
+# This setup is tuned for my DL360p Gen8 SFF server to mainly cope with a malfunctioning HD controller temp sensor and reduce the jumbo sounds
+
+#before running this script please check that this command once you've loaded the id_rsa.pub file into the HP iLo, logs you in
+#ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa proxmox@192.168.0.13
 
 echo "-------------------------------------------------------------------" >> /usr/local/bin/cron.log
-echo /usr/bin/date >> /usr/local/bin/cron.log
+date_now="$(/usr/bin/date)"
+echo "$date_now" >> /usr/local/bin/cron.log
 
-user=root
+user=proxmox
 IP=192.168.0.13
 
 ssh -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedKeyTypes=ssh-rsa ${user}@${IP} "fan t 37 off"
